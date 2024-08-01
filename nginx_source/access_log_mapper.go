@@ -2,19 +2,20 @@ package nginx_source
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/satyrius/gonx"
-	"github.com/turbot/tailpipe-plugin-nginx/nginx_types"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact"
 )
 
 type AccessLogMapper struct {
+	logFormat string
 }
 
-func NewAccessLogMapper() *AccessLogMapper {
-	return &AccessLogMapper{}
+func NewAccessLogMapper(logFormat string) *AccessLogMapper {
+	return &AccessLogMapper{
+		logFormat: logFormat,
+	}
 }
 
 func (c *AccessLogMapper) Identifier() string {
@@ -29,34 +30,20 @@ func (c *AccessLogMapper) Map(ctx context.Context, a *artifact.ArtifactData) ([]
 	if !ok {
 		return nil, fmt.Errorf("expected string, got %T", a.Data)
 	}
-
 	inputMetadata := a.Metadata
 
-	// TODO: #config - obtain this from config
-	logFormat := `$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"`
 	// parse log line
-	parser := gonx.NewParser(logFormat)
+	parser := gonx.NewParser(c.logFormat)
 	parsed, err := parser.ParseString(input)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing log line: %w", err)
 	}
 
-	// marshall Fields map to JSON
-	fields := parsed.Fields()
-	jsonBytes, err := json.Marshal(fields)
-	if err != nil {
-		return nil, fmt.Errorf("error marshalling parsed fields: %w", err)
-	}
+	fields := make(map[string]string)
 
-	// unmarshall JSON to RawAccessLog
-	var rawAccessLog nginx_types.RawAccessLog
-	err = json.Unmarshal(jsonBytes, &rawAccessLog)
-	if err != nil {
-		return nil, fmt.Errorf("error decoding json to RawAccessLog: %w", err)
-	}
+	fields = parsed.Fields()
+	out = append(out, artifact.NewData(fields, artifact.WithMetadata(inputMetadata)))
 
-	// return raw access log and metadata to be enriched
-	out = append(out, artifact.NewData(rawAccessLog, artifact.WithMetadata(inputMetadata)))
 	return out, nil
 }
 
