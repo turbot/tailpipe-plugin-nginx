@@ -3,6 +3,7 @@ package nginx
 import (
 	"time"
 
+	"github.com/turbot/tailpipe-plugin-nginx/nginx_collection"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 )
 
@@ -16,7 +17,7 @@ func NewPlugin() (plugin.TailpipePlugin, error) {
 	time.Sleep(10 * time.Second) // TODO: #debug remove this startup delay
 
 	// register collections which we support
-	err := p.RegisterCollections() // TODO: #finish register collections
+	err := p.RegisterCollections(nginx_collection.NewAccessLogCollection) // TODO: #finish implement error log collection
 	if err != nil {
 		return nil, err
 	}
