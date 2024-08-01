@@ -68,7 +68,7 @@ func (c *AccessLogCollection) getSource(ctx context.Context, config *AccessLogCo
 
 	artifactSource := artifact.NewFileSystemSource(&artifact.FileSystemSourceConfig{
 		Paths:      config.Paths,
-		Extensions: []string{".log-20240729"},
+		Extensions: []string{".log"},
 	})
 
 	pagingData, err := c.GetPagingDataSchema()
