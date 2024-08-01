@@ -1,10 +1,8 @@
 package nginx
 
 import (
-	"github.com/turbot/tailpipe-plugin-sdk/collection"
-	//"time"
-
 	"github.com/turbot/tailpipe-plugin-nginx/nginx_collection"
+	"github.com/turbot/tailpipe-plugin-sdk/collection"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 )
 
@@ -14,8 +12,6 @@ type Plugin struct {
 
 func NewPlugin() (plugin.TailpipePlugin, error) {
 	p := &Plugin{}
-
-	//time.Sleep(10 * time.Second) // TODO: #debug remove this startup delay
 
 	err := p.RegisterResources(
 		&plugin.ResourceFunctions{

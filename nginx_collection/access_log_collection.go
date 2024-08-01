@@ -2,6 +2,7 @@ package nginx_collection
 
 import (
 	"fmt"
+	"github.com/turbot/tailpipe-plugin-sdk/hcl"
 	"strconv"
 	"time"
 
@@ -17,7 +18,7 @@ import (
 
 // AccessLogCollection - collection for nginx access logs
 type AccessLogCollection struct {
-	collection.CollectionBase[AccessLogCollectionConfig]
+	collection.CollectionBase[*AccessLogCollectionConfig]
 }
 
 func (c *AccessLogCollection) SupportedSources() []string {
@@ -48,6 +49,10 @@ func (c *AccessLogCollection) GetSourceOptions() []row_source.RowSourceOption {
 
 func (c *AccessLogCollection) GetRowSchema() any {
 	return nginx_types.AccessLog{}
+}
+
+func (c *AccessLogCollection) GetConfigSchema() hcl.Config {
+	return &AccessLogCollectionConfig{}
 }
 
 // EnrichRow NOTE: Receives RawAccessLog & returns AccessLog
