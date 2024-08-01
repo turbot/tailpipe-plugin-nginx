@@ -42,7 +42,8 @@ func (c *AccessLogMapper) Map(ctx context.Context, a *artifact.ArtifactData) ([]
 	}
 
 	// marshall Fields map to JSON
-	jsonBytes, err := json.Marshal(parsed.Fields)
+	fields := parsed.Fields()
+	jsonBytes, err := json.Marshal(fields)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling parsed fields: %w", err)
 	}

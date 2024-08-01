@@ -7,6 +7,7 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/artifact"
 	"github.com/turbot/tailpipe-plugin-sdk/paging"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
+	"strconv"
 	"time"
 
 	"github.com/rs/xid"
@@ -103,10 +104,22 @@ func (c *AccessLogCollection) EnrichRow(row any, sourceEnrichmentFields *enrichm
 		return nil, fmt.Errorf("error parsing time: %w", err)
 	}
 
+	status, err := strconv.Atoi(rawRecord.Status)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing status to int: %w", err)
+	}
+
+	bbs, err := strconv.Atoi(rawRecord.BodyBytesSent)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing body bytes sent to int: %w", err)
+	}
+
 	record := nginx_types.AccessLog{
-		CommonFields: ecf,
-		RawAccessLog: rawRecord,
-		Timestamp:    t,
+		CommonFields:          ecf,
+		AccessLogCommonFields: rawRecord.AccessLogCommonFields,
+		Status:                status,
+		BodyBytesSent:         bbs,
+		Timestamp:             t,
 	}
 
 	// Record standardization
@@ -123,7 +136,7 @@ func (c *AccessLogCollection) EnrichRow(row any, sourceEnrichmentFields *enrichm
 	record.TpMonth = int32(t.Month())
 	record.TpDay = int32(t.Day())
 
-	return nil, err
+	return record, err
 }
 
 // NOTE: Mapper could be the parser of the log file -> log line decode struct from log line
