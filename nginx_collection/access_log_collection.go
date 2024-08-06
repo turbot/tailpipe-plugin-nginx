@@ -123,6 +123,7 @@ func (c *AccessLogCollection) EnrichRow(row any, sourceEnrichmentFields *enrichm
 	// Record standardization
 	record.TpID = xid.New().String()
 	record.TpIngestTimestamp = helpers.UnixMillis(time.Now().UnixNano() / int64(time.Millisecond))
+	record.TpTimestamp = helpers.UnixMillis(record.Timestamp.UnixNano() / int64(time.Millisecond))
 	record.TpSourceType = "nginx_access_log" // TODO: #refactor move to source?
 
 	// Hive Fields
