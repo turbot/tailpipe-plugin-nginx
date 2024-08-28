@@ -35,7 +35,7 @@ func (c *AccessLogPartition) Identifier() string {
 	return "nginx_access_log"
 }
 
-func (c *AccessLogPartition) GetSourceOptions() []row_source.RowSourceOption {
+func (c *AccessLogPartition) GetSourceOptions(sourceType string) []row_source.RowSourceOption {
 	if c.Config.LogFormat == nil {
 		defaultLogFormat := `$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"`
 		c.Config.LogFormat = &defaultLogFormat
