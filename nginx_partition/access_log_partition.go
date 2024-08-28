@@ -1,8 +1,7 @@
-package nginx_collection
+package nginx_partition
 
 import (
 	"fmt"
-	"github.com/turbot/tailpipe-plugin-sdk/hcl"
 	"strconv"
 	"time"
 
@@ -10,32 +9,33 @@ import (
 	"github.com/turbot/tailpipe-plugin-nginx/nginx_source"
 	"github.com/turbot/tailpipe-plugin-nginx/nginx_types"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
-	"github.com/turbot/tailpipe-plugin-sdk/collection"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/helpers"
+	"github.com/turbot/tailpipe-plugin-sdk/parse"
+	"github.com/turbot/tailpipe-plugin-sdk/partition"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 )
 
-// AccessLogCollection - collection for nginx access logs
-type AccessLogCollection struct {
-	collection.CollectionBase[*AccessLogCollectionConfig]
+// AccessLogPartition - partition for nginx access logs
+type AccessLogPartition struct {
+	partition.PartitionBase[*AccessLogPartitionConfig]
 }
 
-func (c *AccessLogCollection) SupportedSources() []string {
+func (c *AccessLogPartition) SupportedSources() []string {
 	return []string{
 		artifact_source.FileSystemSourceIdentifier,
 	}
 }
 
-func NewAccessLogCollection() collection.Collection {
-	return &AccessLogCollection{}
+func NewAccessLogCollection() partition.Partition {
+	return &AccessLogPartition{}
 }
 
-func (c *AccessLogCollection) Identifier() string {
+func (c *AccessLogPartition) Identifier() string {
 	return "nginx_access_log"
 }
 
-func (c *AccessLogCollection) GetSourceOptions() []row_source.RowSourceOption {
+func (c *AccessLogPartition) GetSourceOptions() []row_source.RowSourceOption {
 	if c.Config.LogFormat == nil {
 		defaultLogFormat := `$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"`
 		c.Config.LogFormat = &defaultLogFormat
@@ -43,20 +43,20 @@ func (c *AccessLogCollection) GetSourceOptions() []row_source.RowSourceOption {
 
 	return []row_source.RowSourceOption{
 		artifact_source.WithRowPerLine(),
-		artifact_source.WithMapper(nginx_source.NewAccessLogMapper(*c.Config.LogFormat)),
+		artifact_source.WithArtifactMapper(nginx_source.NewAccessLogMapper(*c.Config.LogFormat)),
 	}
 }
 
-func (c *AccessLogCollection) GetRowSchema() any {
+func (c *AccessLogPartition) GetRowSchema() any {
 	return nginx_types.AccessLog{}
 }
 
-func (c *AccessLogCollection) GetConfigSchema() hcl.Config {
-	return &AccessLogCollectionConfig{}
+func (c *AccessLogPartition) GetConfigSchema() parse.Config {
+	return &AccessLogPartitionConfig{}
 }
 
 // EnrichRow NOTE: Receives RawAccessLog & returns AccessLog
-func (c *AccessLogCollection) EnrichRow(row any, sourceEnrichmentFields *enrichment.CommonFields) (any, error) {
+func (c *AccessLogPartition) EnrichRow(row any, sourceEnrichmentFields *enrichment.CommonFields) (any, error) {
 	// short-circuit for unexpected row type
 	rawRecord, ok := row.(map[string]string)
 	if !ok {
@@ -127,8 +127,8 @@ func (c *AccessLogCollection) EnrichRow(row any, sourceEnrichmentFields *enrichm
 	record.TpSourceType = "nginx_access_log" // TODO: #refactor move to source?
 
 	// Hive Fields
-	record.TpCollection = c.Identifier()
-	record.TpConnection = c.Identifier() // TODO: #refactor figure out how to get connection
+	record.TpPartition = c.Identifier()
+	record.TpIndex = c.Identifier() // TODO: #refactor figure out how to get connection
 	record.TpYear = int32(record.Timestamp.Year())
 	record.TpMonth = int32(record.Timestamp.Month())
 	record.TpDay = int32(record.Timestamp.Day())

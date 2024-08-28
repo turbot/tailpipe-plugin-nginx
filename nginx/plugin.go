@@ -1,8 +1,8 @@
 package nginx
 
 import (
-	"github.com/turbot/tailpipe-plugin-nginx/nginx_collection"
-	"github.com/turbot/tailpipe-plugin-sdk/collection"
+	"github.com/turbot/tailpipe-plugin-nginx/nginx_partition"
+	"github.com/turbot/tailpipe-plugin-sdk/partition"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 )
 
@@ -15,7 +15,7 @@ func NewPlugin() (plugin.TailpipePlugin, error) {
 
 	err := p.RegisterResources(
 		&plugin.ResourceFunctions{
-			Collections: []func() collection.Collection{nginx_collection.NewAccessLogCollection}, // TODO: #finish implement error log collection
+			Partitions: []func() partition.Partition{nginx_partition.NewAccessLogCollection}, // TODO: #finish implement error log collection
 		})
 	if err != nil {
 		return nil, err
