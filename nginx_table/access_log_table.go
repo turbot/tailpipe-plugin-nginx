@@ -1,4 +1,4 @@
-package nginx_partition
+package nginx_table
 
 import (
 	"fmt"
@@ -12,30 +12,30 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/helpers"
 	"github.com/turbot/tailpipe-plugin-sdk/parse"
-	"github.com/turbot/tailpipe-plugin-sdk/partition"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
+	"github.com/turbot/tailpipe-plugin-sdk/table"
 )
 
-// AccessLogPartition - partition for nginx access logs
-type AccessLogPartition struct {
-	partition.PartitionBase[*AccessLogPartitionConfig]
+// AccessLogTable - table for nginx access logs
+type AccessLogTable struct {
+	table.TableBase[*AccessLogTableConfig]
 }
 
-func (c *AccessLogPartition) SupportedSources() []string {
+func (c *AccessLogTable) SupportedSources() []string {
 	return []string{
 		artifact_source.FileSystemSourceIdentifier,
 	}
 }
 
-func NewAccessLogCollection() partition.Partition {
-	return &AccessLogPartition{}
+func NewAccessLogCollection() table.Table {
+	return &AccessLogTable{}
 }
 
-func (c *AccessLogPartition) Identifier() string {
+func (c *AccessLogTable) Identifier() string {
 	return "nginx_access_log"
 }
 
-func (c *AccessLogPartition) GetSourceOptions(sourceType string) []row_source.RowSourceOption {
+func (c *AccessLogTable) GetSourceOptions(sourceType string) []row_source.RowSourceOption {
 	if c.Config.LogFormat == nil {
 		defaultLogFormat := `$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"`
 		c.Config.LogFormat = &defaultLogFormat
@@ -47,16 +47,16 @@ func (c *AccessLogPartition) GetSourceOptions(sourceType string) []row_source.Ro
 	}
 }
 
-func (c *AccessLogPartition) GetRowSchema() any {
+func (c *AccessLogTable) GetRowSchema() any {
 	return nginx_types.AccessLog{}
 }
 
-func (c *AccessLogPartition) GetConfigSchema() parse.Config {
-	return &AccessLogPartitionConfig{}
+func (c *AccessLogTable) GetConfigSchema() parse.Config {
+	return &AccessLogTableConfig{}
 }
 
 // EnrichRow NOTE: Receives RawAccessLog & returns AccessLog
-func (c *AccessLogPartition) EnrichRow(row any, sourceEnrichmentFields *enrichment.CommonFields) (any, error) {
+func (c *AccessLogTable) EnrichRow(row any, sourceEnrichmentFields *enrichment.CommonFields) (any, error) {
 	// short-circuit for unexpected row type
 	rawRecord, ok := row.(map[string]string)
 	if !ok {
@@ -127,7 +127,7 @@ func (c *AccessLogPartition) EnrichRow(row any, sourceEnrichmentFields *enrichme
 	record.TpSourceType = "nginx_access_log" // TODO: #refactor move to source?
 
 	// Hive Fields
-	record.TpPartition = c.Identifier()
+	record.TpTable = c.Identifier()
 	record.TpIndex = c.Identifier() // TODO: #refactor figure out how to get connection
 	record.TpYear = int32(record.Timestamp.Year())
 	record.TpMonth = int32(record.Timestamp.Month())
