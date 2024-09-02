@@ -36,6 +36,9 @@ func (c *AccessLogTable) Identifier() string {
 }
 
 func (c *AccessLogTable) GetSourceOptions(sourceType string) []row_source.RowSourceOption {
+	if c.Config == nil {
+		c.Config = &AccessLogTableConfig{}
+	}
 	if c.Config.LogFormat == nil {
 		defaultLogFormat := `$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"`
 		c.Config.LogFormat = &defaultLogFormat
