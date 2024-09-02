@@ -1,9 +1,9 @@
 package nginx
 
 import (
-	"github.com/turbot/tailpipe-plugin-nginx/nginx_collection"
-	"github.com/turbot/tailpipe-plugin-sdk/collection"
+	"github.com/turbot/tailpipe-plugin-nginx/nginx_table"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
+	"github.com/turbot/tailpipe-plugin-sdk/table"
 )
 
 type Plugin struct {
@@ -15,7 +15,7 @@ func NewPlugin() (plugin.TailpipePlugin, error) {
 
 	err := p.RegisterResources(
 		&plugin.ResourceFunctions{
-			Collections: []func() collection.Collection{nginx_collection.NewAccessLogCollection}, // TODO: #finish implement error log collection
+			Tables: []func() table.Table{nginx_table.NewAccessLogCollection}, // TODO: #finish implement error log collection
 		})
 	if err != nil {
 		return nil, err
