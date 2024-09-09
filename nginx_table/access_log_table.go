@@ -132,9 +132,7 @@ func (c *AccessLogTable) EnrichRow(row any, sourceEnrichmentFields *enrichment.C
 	// Hive Fields
 	record.TpPartition = c.Identifier()
 	record.TpIndex = c.Identifier() // TODO: #refactor figure out how to get connection
-	record.TpYear = int32(record.Timestamp.Year())
-	record.TpMonth = int32(record.Timestamp.Month())
-	record.TpDay = int32(record.Timestamp.Day())
+	record.TpDate = record.Timestamp.Format("2006-01-02")
 
 	return record, nil
 }
