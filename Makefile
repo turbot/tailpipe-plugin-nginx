@@ -1,6 +1,6 @@
 # Paths
 PLUGIN_NAME=tailpipe-plugin-nginx.plugin
-PLUGIN_DIR=~/.tailpipe/plugins/
+PLUGIN_DIR=~/.tailpipe/plugins/hub.tailpipe.io/plugins/turbot/nginx@latest/
 
 # Build in development mode by default
 .PHONY: default
