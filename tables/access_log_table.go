@@ -1,4 +1,4 @@
-package nginx_table
+package tables
 
 import (
 	"fmt"
@@ -6,8 +6,7 @@ import (
 	"time"
 
 	"github.com/rs/xid"
-	"github.com/turbot/tailpipe-plugin-nginx/nginx_source"
-	"github.com/turbot/tailpipe-plugin-nginx/nginx_types"
+	"github.com/turbot/tailpipe-plugin-nginx/mappers"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/helpers"
@@ -46,12 +45,12 @@ func (c *AccessLogTable) GetSourceOptions(sourceType string) []row_source.RowSou
 
 	return []row_source.RowSourceOption{
 		artifact_source.WithRowPerLine(),
-		artifact_source.WithArtifactMapper(nginx_source.NewAccessLogMapper(*c.Config.LogFormat)),
+		artifact_source.WithArtifactMapper(mappers.NewAccessLogMapper(*c.Config.LogFormat)),
 	}
 }
 
 func (c *AccessLogTable) GetRowSchema() any {
-	return nginx_types.AccessLog{}
+	return AccessLog{}
 }
 
 func (c *AccessLogTable) GetConfigSchema() parse.Config {
@@ -69,7 +68,7 @@ func (c *AccessLogTable) EnrichRow(row any, sourceEnrichmentFields *enrichment.C
 	// TODO: #validate ensure we have either `time_local` or `time_iso8601` field as without one of these we can't populate timestamp...
 
 	// Build record and add any source enrichment fields
-	var record nginx_types.AccessLog
+	var record AccessLog
 	if sourceEnrichmentFields != nil {
 		record.CommonFields = *sourceEnrichmentFields
 	}

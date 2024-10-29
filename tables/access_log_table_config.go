@@ -1,4 +1,4 @@
-package nginx_table
+package tables
 
 type AccessLogTableConfig struct {
 	LogFormat *string `hcl:"log_format"`

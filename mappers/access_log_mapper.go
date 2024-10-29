@@ -1,4 +1,4 @@
-package nginx_source
+package mappers
 
 import (
 	"context"

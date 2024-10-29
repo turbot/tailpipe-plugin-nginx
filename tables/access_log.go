@@ -1,4 +1,4 @@
-package nginx_types
+package tables
 
 import (
 	"time"
