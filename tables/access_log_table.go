@@ -7,6 +7,7 @@ import (
 
 	"github.com/rs/xid"
 	"github.com/turbot/tailpipe-plugin-nginx/mappers"
+	"github.com/turbot/tailpipe-plugin-nginx/models"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/helpers"
@@ -50,7 +51,7 @@ func (c *AccessLogTable) GetSourceOptions(sourceType string) []row_source.RowSou
 }
 
 func (c *AccessLogTable) GetRowSchema() any {
-	return AccessLog{}
+	return models.AccessLog{}
 }
 
 func (c *AccessLogTable) GetConfigSchema() parse.Config {
@@ -68,7 +69,7 @@ func (c *AccessLogTable) EnrichRow(row any, sourceEnrichmentFields *enrichment.C
 	// TODO: #validate ensure we have either `time_local` or `time_iso8601` field as without one of these we can't populate timestamp...
 
 	// Build record and add any source enrichment fields
-	var record AccessLog
+	var record models.AccessLog
 	if sourceEnrichmentFields != nil {
 		record.CommonFields = *sourceEnrichmentFields
 	}
