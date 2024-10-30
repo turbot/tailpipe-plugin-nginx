@@ -3,12 +3,13 @@ package main
 import (
 	"log/slog"
 
+	"github.com/turbot/tailpipe-plugin-nginx/nginx"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 )
 
 func main() {
 	err := plugin.Serve(&plugin.ServeOpts{
-		PluginFunc: NewPlugin,
+		PluginFunc: nginx.NewPlugin,
 	})
 
 	if err != nil {

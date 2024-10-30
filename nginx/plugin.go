@@ -1,4 +1,4 @@
-package main
+package nginx
 
 import (
 	"github.com/turbot/tailpipe-plugin-nginx/tables"
