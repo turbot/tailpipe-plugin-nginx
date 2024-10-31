@@ -21,12 +21,6 @@ type AccessLogTable struct {
 	table.TableBase[*AccessLogTableConfig]
 }
 
-func (c *AccessLogTable) SupportedSources() []string {
-	return []string{
-		artifact_source.FileSystemSourceIdentifier,
-	}
-}
-
 func NewAccessLogCollection() table.Table {
 	return &AccessLogTable{}
 }
