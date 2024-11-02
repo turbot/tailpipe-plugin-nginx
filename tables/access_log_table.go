@@ -2,9 +2,10 @@ package tables
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"github.com/turbot/tailpipe-plugin-nginx/config"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_mapper"
+	"github.com/turbot/tailpipe-plugin-sdk/types"
 	"strconv"
 	"time"
 
@@ -21,7 +22,7 @@ import (
 
 // AccessLogTable - table for nginx access logs
 type AccessLogTable struct {
-	table.TableBase[*AccessLogTableConfig]
+	table.TableBase[*AccessLogTableConfig, *config.NginxConnection]
 }
 
 func NewAccessLogCollection() table.Table {
@@ -32,9 +33,9 @@ func (c *AccessLogTable) Identifier() string {
 	return "nginx_access_log"
 }
 
-func (c *AccessLogTable) Init(ctx context.Context, tableConfigData *parse.Data, collectionStateJSON json.RawMessage, sourceConfigData *parse.Data) error {
+func (c *AccessLogTable) Init(ctx context.Context, connectionSchemaProvider table.ConnectionSchemaProvider, req *types.CollectRequest) error {
 	// call base init
-	if err := c.TableBase.Init(ctx, tableConfigData, collectionStateJSON, sourceConfigData); err != nil {
+	if err := c.TableBase.Init(ctx, connectionSchemaProvider, req); err != nil {
 		return err
 	}
 	c.setMappers()
