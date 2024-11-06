@@ -4,8 +4,8 @@ install:
 	go build -o $(TAILPIPE_INSTALL_DIR)/plugins/hub.tailpipe.io/plugins/turbot/nginx@latest/tailpipe-plugin-nginx.plugin -tags "${BUILD_TAGS}" *.go
 
 ## Paths
-#PLUGIN_NAME=tailpipe-plugin-nginx.plugin
-#PLUGIN_DIR=~/.tailpipe/plugins/hub.tailpipe.io/plugins/turbot/nginx@latest/
+#PLUGIN_NAME=tailpipe-plugin-pipes.plugin
+#PLUGIN_DIR=~/.tailpipe/plugins/hub.tailpipe.io/plugins/turbot/pipes@latest/
 #
 ## Build in development mode by default
 #.PHONY: default
@@ -30,3 +30,4 @@ install:
 #.PHONY: clean
 #clean:
 #	rm -f $(PLUGIN_NAME)
+
