@@ -362,6 +362,72 @@ LIMIT 25;
 ```
 
 
+## Architecture
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Tailpipe
+    participant Plugin SDK
+    participant NGINX Plugin
+    participant Log File
+    participant DuckDB
+    
+    Note over User,DuckDB: Collection Phase
+    
+    User->>Tailpipe: tailpipe collect nginx_access_log.web_servers
+    Tailpipe->>Plugin SDK: Load plugin
+    Plugin SDK->>NGINX Plugin: Initialize plugin
+    
+    Tailpipe->>NGINX Plugin: GetConfigSchema()
+    NGINX Plugin-->>Tailpipe: AccessLogFileSourceConfig
+    
+    Tailpipe->>NGINX Plugin: Collect()
+    
+    activate NGINX Plugin
+    NGINX Plugin->>Log File: Open log file
+    Log File-->>NGINX Plugin: File handle
+    
+    loop For each log line
+        NGINX Plugin->>Log File: Read line
+        Log File-->>NGINX Plugin: Log entry
+        NGINX Plugin->>NGINX Plugin: ParseLogLine()
+        NGINX Plugin->>NGINX Plugin: IsValidLogLine()
+        NGINX Plugin->>Plugin SDK: OnRow()
+        Plugin SDK->>NGINX Plugin: EnrichRow()
+        NGINX Plugin->>Plugin SDK: Return enriched row
+    end
+    
+    Plugin SDK->>Plugin SDK: Buffer rows
+    Plugin SDK->>Plugin SDK: Create parquet file
+    Plugin SDK->>Tailpipe: Return collection metadata
+    deactivate NGINX Plugin
+    
+    Tailpipe->>DuckDB: Update schema/views
+    DuckDB-->>Tailpipe: Confirmation
+    Tailpipe-->>User: Collection complete
+
+    Note over User,DuckDB: Query Phase
+
+    User->>Tailpipe: tailpipe query "SELECT * FROM nginx_access_log..."
+    Tailpipe->>DuckDB: Open database
+    DuckDB-->>Tailpipe: Connection established
+    
+    Tailpipe->>DuckDB: Execute query
+    
+    activate DuckDB
+    DuckDB->>DuckDB: Parse query
+    DuckDB->>DuckDB: Plan query
+    Note right of DuckDB: Apply partition pruning
+    DuckDB->>DuckDB: Read relevant parquet files
+    DuckDB->>DuckDB: Execute query plan
+    DuckDB-->>Tailpipe: Query results
+    deactivate DuckDB
+    
+    Tailpipe-->>User: Format and display results
+```
+
+
 ## Developers
 
 Build a developer version of the plugin:
