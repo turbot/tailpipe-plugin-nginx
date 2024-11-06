@@ -1,7 +1,11 @@
 package tables
 
 import (
+	"context"
 	"fmt"
+	"github.com/turbot/tailpipe-plugin-nginx/config"
+	"github.com/turbot/tailpipe-plugin-sdk/artifact_mapper"
+	"github.com/turbot/tailpipe-plugin-sdk/types"
 	"strconv"
 	"time"
 
@@ -18,7 +22,7 @@ import (
 
 // AccessLogTable - table for nginx access logs
 type AccessLogTable struct {
-	table.TableBase[*AccessLogTableConfig]
+	table.TableBase[*AccessLogTableConfig, *config.NginxConnection]
 }
 
 func NewAccessLogCollection() table.Table {
@@ -27,6 +31,26 @@ func NewAccessLogCollection() table.Table {
 
 func (c *AccessLogTable) Identifier() string {
 	return "nginx_access_log"
+}
+
+func (c *AccessLogTable) Init(ctx context.Context, connectionSchemaProvider table.ConnectionSchemaProvider, req *types.CollectRequest) error {
+	// call base init
+	if err := c.TableBase.Init(ctx, connectionSchemaProvider, req); err != nil {
+		return err
+	}
+	c.setMappers()
+	return nil
+}
+
+func (c *AccessLogTable) setMappers() {
+	// TODO switch on source
+
+	// TODO KAI make sure tables add NewCloudwatchMapper if needed
+	// NOTE: add the cloudwatch mapper to ensure rows are in correct format
+	//s.AddMappers(artifact_mapper.NewCloudwatchMapper())
+
+	// if the source is an artifact source, we need a mapper
+	c.Mappers = []artifact_mapper.Mapper{mappers.NewAccessLogMapper(*c.Config.LogFormat)}
 }
 
 func (c *AccessLogTable) GetSourceOptions(sourceType string) []row_source.RowSourceOption {
@@ -40,7 +64,6 @@ func (c *AccessLogTable) GetSourceOptions(sourceType string) []row_source.RowSou
 
 	return []row_source.RowSourceOption{
 		artifact_source.WithRowPerLine(),
-		artifact_source.WithArtifactMapper(mappers.NewAccessLogMapper(*c.Config.LogFormat)),
 	}
 }
 

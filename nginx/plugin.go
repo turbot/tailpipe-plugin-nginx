@@ -1,14 +1,20 @@
 package nginx
 
 import (
+	"github.com/turbot/tailpipe-plugin-nginx/config"
 	"github.com/turbot/tailpipe-plugin-nginx/tables"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 	"github.com/turbot/tailpipe-plugin-sdk/table"
 )
 
-// NewPlugin returns a new instance of a [plugin.TailpipePlugin]
+type Plugin struct {
+	plugin.PluginBase
+}
+
 func NewPlugin() (plugin.TailpipePlugin, error) {
-	p := plugin.NewPlugin("nginx")
+	p := &Plugin{
+		PluginBase: plugin.NewPluginBase("nginx", config.NewNginxConnection),
+	}
 
 	err := p.RegisterResources(
 		&plugin.ResourceFunctions{

@@ -6,7 +6,6 @@ import (
 
 	"github.com/satyrius/gonx"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_mapper"
-	"github.com/turbot/tailpipe-plugin-sdk/types"
 )
 
 type AccessLogMapper struct {
@@ -23,15 +22,14 @@ func (c *AccessLogMapper) Identifier() string {
 	return "access_log_mapper"
 }
 
-func (c *AccessLogMapper) Map(ctx context.Context, a *types.RowData) ([]*types.RowData, error) {
-	var out []*types.RowData
+func (c *AccessLogMapper) Map(ctx context.Context, a any) ([]any, error) {
+	var out []any
 
 	// validate input type is string
-	input, ok := a.Data.(string)
+	input, ok := a.(string)
 	if !ok {
-		return nil, fmt.Errorf("expected string, got %T", a.Data)
+		return nil, fmt.Errorf("expected string, got %T", a)
 	}
-	inputMetadata := a.Metadata
 
 	// parse log line
 	parser := gonx.NewParser(c.logFormat)
@@ -43,7 +41,7 @@ func (c *AccessLogMapper) Map(ctx context.Context, a *types.RowData) ([]*types.R
 	fields := make(map[string]string)
 
 	fields = parsed.Fields()
-	out = append(out, types.NewData(fields, types.WithMetadata(inputMetadata)))
+	out = append(out, fields)
 
 	return out, nil
 }
