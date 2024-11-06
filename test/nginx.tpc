@@ -1,0 +1,9 @@
+partition "nginx_access_log" "web_servers" {
+    plugin = "nginx"
+    source "nginx_access_log_file" {
+        #log_path = "/home/jon/tpsrc/tailpipe-plugin-nginx/test/sample.log"
+        #log_path = "/home/jon/tpsrc/tailpipe-plugin-nginx/test/hn_4.log"
+        log_path = "/home/jon/tpsrc/tailpipe-plugin-nginx/test/test.log"  # combination of auto-generated sample.log and real hn_4.log"
+    }
+}
+
