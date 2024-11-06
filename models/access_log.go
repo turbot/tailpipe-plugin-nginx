@@ -9,7 +9,7 @@ type AccessLog struct {
     // embed required enrichment fields
     enrichment.CommonFields
 
-    // NGINX specific fields
+    // Core NGINX fields
     RemoteAddr    string    `json:"remote_addr"`
     RemoteUser    string    `json:"remote_user"`
     TimeLocal     time.Time `json:"time_local"`
@@ -22,8 +22,19 @@ type AccessLog struct {
     UserAgent     string    `json:"user_agent"`
     ServerName    string    `json:"server_name"`
 
+    // Optional extended fields
+    Request     string `json:"request,omitempty"`
+    TimeIso8601 string `json:"time_iso8601,omitempty"`
+
     // Time component fields for partitioning and querying
-    TpYear       int `json:"tp_year"`
-    TpMonth      int `json:"tp_month"`
-    TpDay        int `json:"tp_day"`
+    TpYear  int `json:"tp_year"`
+    TpMonth int `json:"tp_month"`
+    TpDay   int `json:"tp_day"`
+}
+
+// NewAccessLog creates a new AccessLog instance
+func NewAccessLog() *AccessLog {
+    return &AccessLog{
+        ServerName: "default",
+    }
 }

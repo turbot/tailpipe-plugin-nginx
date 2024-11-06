@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+	// Initialize plugin options
 	err := plugin.Serve(&plugin.ServeOpts{
 		PluginFunc: nginx.NewPlugin,
 	})

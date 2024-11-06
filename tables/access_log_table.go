@@ -3,7 +3,9 @@ package tables
 import (
 	"fmt"
 	"time"
+
 	"github.com/rs/xid"
+	"github.com/turbot/tailpipe-plugin-nginx/config"
 	"github.com/turbot/tailpipe-plugin-nginx/models"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/helpers"
@@ -14,7 +16,7 @@ import (
 const AccessLogTableIdentifier = "nginx_access_log"
 
 type AccessLogTable struct {
-	table.TableBase[*AccessLogTableConfig]
+	table.TableImpl[*models.AccessLog, *AccessLogTableConfig, *config.NginxConnection]
 }
 
 func NewAccessLogTable() table.Table {
@@ -26,58 +28,53 @@ func (t *AccessLogTable) Identifier() string {
 }
 
 func (t *AccessLogTable) GetRowSchema() any {
-	return models.AccessLog{}
+	return &models.AccessLog{}
 }
 
 func (t *AccessLogTable) GetConfigSchema() parse.Config {
 	return &AccessLogTableConfig{}
 }
 
-func (t *AccessLogTable) EnrichRow(row any, sourceEnrichmentFields *enrichment.CommonFields) (any, error) {
-	item, ok := row.(models.AccessLog)
-	if !ok {
-		return nil, fmt.Errorf("invalid row type %T, expected AccessLog", row)
-	}
-	
+func (t *AccessLogTable) EnrichRow(row *models.AccessLog, sourceEnrichmentFields *enrichment.CommonFields) (*models.AccessLog, error) {
 	if sourceEnrichmentFields == nil {
 		return nil, fmt.Errorf("AccessLogTable EnrichRow called with nil sourceEnrichmentFields")
 	}
+	if sourceEnrichmentFields.TpSourceName == "" {
+		return nil, fmt.Errorf("AccessLogTable EnrichRow called with TpSourceName unset in sourceEnrichmentFields")
+	}
 
-	item.CommonFields = *sourceEnrichmentFields
+	// Embed the source enrichment fields
+	row.CommonFields = *sourceEnrichmentFields
 
 	// Populate required fields
-	item.TpID = xid.New().String()
-	item.TpTimestamp = helpers.UnixMillis(item.TimeLocal.UnixNano() / int64(time.Millisecond))
-	item.TpPartition = AccessLogTableIdentifier
-	item.TpIndex = item.ServerName
-	item.TpDate = item.TimeLocal.Format("2006-01-02")
-	
-	// Split date components
-	item.TpYear = item.TimeLocal.Year()
-	item.TpMonth = int(item.TimeLocal.Month())
-	item.TpDay = item.TimeLocal.Day()
+	row.TpID = xid.New().String()
+	row.TpTimestamp = helpers.UnixMillis(row.TimeLocal.UnixNano() / int64(time.Millisecond))
+	row.TpPartition = AccessLogTableIdentifier
+	row.TpIndex = row.ServerName
+	row.TpDate = row.TimeLocal.Format("2006-01-02")
 
-	// Enrichment fields
-	item.TpSourceName = AccessLogTableIdentifier
-	item.TpSourceType = "nginx_access_log"
-	item.TpSourceLocation = sourceEnrichmentFields.TpSourceLocation
-	item.TpIngestTimestamp = helpers.UnixMillis(time.Now().UnixNano() / int64(time.Millisecond))
+	// Split date components
+	row.TpYear = row.TimeLocal.Year()
+	row.TpMonth = int(row.TimeLocal.Month())
+	row.TpDay = row.TimeLocal.Day()
 
 	// IP addresses
-	if item.RemoteAddr != "" {
-		item.TpSourceIP = &item.RemoteAddr
-		item.TpIps = append(item.TpIps, item.RemoteAddr)
+	if row.RemoteAddr != "" {
+		row.TpSourceIP = &row.RemoteAddr
+		row.TpIps = append(row.TpIps, row.RemoteAddr)
 	}
 
 	// Usernames
-	if item.RemoteUser != "-" {
-		item.TpUsernames = append(item.TpUsernames, item.RemoteUser)
+	if row.RemoteUser != "-" && row.RemoteUser != "" {
+		row.TpUsernames = append(row.TpUsernames, row.RemoteUser)
 	}
 
 	// Domains
-	if item.ServerName != "" {
-		item.TpDomains = append(item.TpDomains, item.ServerName)
+	if row.ServerName != "" {
+		row.TpDomains = append(row.TpDomains, row.ServerName)
 	}
 
-	return item, nil
+	row.TpIngestTimestamp = helpers.UnixMillis(time.Now().UnixNano() / int64(time.Millisecond))
+
+	return row, nil
 }

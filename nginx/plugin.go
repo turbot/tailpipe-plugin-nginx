@@ -1,6 +1,7 @@
 package nginx
 
 import (
+	"github.com/turbot/tailpipe-plugin-nginx/config"
 	"github.com/turbot/tailpipe-plugin-nginx/sources"
 	"github.com/turbot/tailpipe-plugin-nginx/tables"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
@@ -8,8 +9,14 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/table"
 )
 
+type Plugin struct {
+	plugin.PluginImpl
+}
+
 func NewPlugin() (plugin.TailpipePlugin, error) {
-	p := plugin.NewPlugin("nginx")
+	p := &Plugin{
+		PluginImpl: plugin.NewPluginImpl("nginx", config.NewNginxConnection),
+	}
 
 	// register the tables, sources and mappers that we provide
 	resources := &plugin.ResourceFunctions{
