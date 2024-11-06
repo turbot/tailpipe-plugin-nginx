@@ -11,8 +11,8 @@ import (
     "github.com/turbot/tailpipe-plugin-nginx/models"
 )
 
-// Standard NGINX combined log format regex
-var nginxRegex = regexp.MustCompile(`^(?P<remote_addr>[^ ]*) (?P<remote_user>[^ ]*) (?P<user>[^ ]*) \[(?P<time_local>[^\]]*)\] "(?P<method>[A-Z]+)? ?(?P<uri>[^\"]*)" (?P<status>[^ ]*) (?P<bytes_sent>[^ ]*) "(?P<referer>[^\"]*)" "(?P<user_agent>[^\"]*)" (?P<server_name>[^ ]*)$`)
+// Updated regex to match standard NGINX log format including double quotes and optional HTTP version
+var nginxRegex = regexp.MustCompile(`^(?P<remote_addr>[^ ]*) (?P<remote_user>[^ ]*) (?P<user>[^ ]*) \[(?P<time_local>[^\]]*)\] "(?:(?P<method>[^ ]*) (?P<uri>[^ ]*)(?: HTTP/[0-9.]+)?|[^"]*)" (?P<status>[0-9]*) (?P<bytes_sent>[0-9-]*) "(?P<referer>[^"]*)" "(?P<user_agent>[^"]*)"`)
 
 // ParseLogLine parses a single line of NGINX access log
 func ParseLogLine(line string) (models.AccessLog, error) {
@@ -39,14 +39,17 @@ func ParseLogLine(line string) (models.AccessLog, error) {
     }
 
     // Parse status code
-    status, err := strconv.Atoi(fields["status"])
-    if err != nil {
-        return models.AccessLog{}, fmt.Errorf("error parsing status code: %v", err)
+    status := 0
+    if fields["status"] != "" {
+        status, err = strconv.Atoi(fields["status"])
+        if err != nil {
+            return models.AccessLog{}, fmt.Errorf("error parsing status code: %v", err)
+        }
     }
 
     // Parse bytes sent
     bytesSent := int64(0)
-    if fields["bytes_sent"] != "-" {
+    if fields["bytes_sent"] != "" && fields["bytes_sent"] != "-" {
         bytesSent, err = strconv.ParseInt(fields["bytes_sent"], 10, 64)
         if err != nil {
             return models.AccessLog{}, fmt.Errorf("error parsing bytes sent: %v", err)
@@ -59,11 +62,13 @@ func ParseLogLine(line string) (models.AccessLog, error) {
         remoteUser = ""
     }
 
-    // Split URI to get protocol
-    uriParts := strings.Split(fields["uri"], " ")
+    // Extract protocol from request
     protocol := ""
-    if len(uriParts) > 2 {
-        protocol = uriParts[2]
+    if strings.Contains(fields["uri"], " HTTP/") {
+        parts := strings.Split(fields["uri"], " ")
+        if len(parts) > 1 {
+            protocol = parts[len(parts)-1]
+        }
     }
 
     // Build log entry
@@ -78,7 +83,7 @@ func ParseLogLine(line string) (models.AccessLog, error) {
         BytesSent:    bytesSent,
         Referer:      fields["referer"],
         UserAgent:    fields["user_agent"],
-        ServerName:   fields["server_name"],
+        ServerName:   "default", // Since server name isn't in the log format
     }
 
     return logEntry, nil
