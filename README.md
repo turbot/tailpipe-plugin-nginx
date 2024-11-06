@@ -249,6 +249,118 @@ SELECT
 └──────────────────────┴──────────┴──────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────┴─────────────────────┘
 ```
 
+### Mitre-oriented query
+
+```
+-- t1595.log generated from 1595.py
+-- MITRE ATT&CK: T1595 Active Scanning
+-- Detects systematic scanning activity through multiple indicators:
+-- 1. Known scanning tools
+-- 2. High-frequency requests from single IPs
+-- 3. Common vulnerability probe paths
+-- 4. Pattern of sequential scanning behavior
+
+WITH scanner_metrics AS (
+    SELECT 
+        remote_addr,
+        COUNT(*) as total_requests,
+        COUNT(DISTINCT uri) as unique_paths,
+        array_agg(DISTINCT user_agent) as user_agents,
+        array_agg(DISTINCT uri) as paths_tried,
+        COUNT(CASE WHEN status >= 400 THEN 1 END)::float / COUNT(*) as error_rate,
+        COUNT(CASE WHEN user_agent LIKE '%zgrab%' 
+                OR user_agent LIKE '%Nuclei%'
+                OR user_agent LIKE '%Nmap%'
+                OR user_agent LIKE '%CensysInspect%'
+                OR user_agent LIKE '%Expanse%'
+                THEN 1 END) as scanner_ua_count,
+        COUNT(CASE WHEN uri LIKE '%phpinfo%'
+                OR uri LIKE '%_profiler%'
+                OR uri LIKE '%.git%'
+                OR uri LIKE '%.env%'
+                OR uri LIKE '%wp-%'
+                OR uri LIKE '%admin%'
+                THEN 1 END) as probe_path_count,
+        MIN(time_local) as first_seen,
+        MAX(time_local) as last_seen,
+        EXTRACT(EPOCH FROM (MAX(time_local) - MIN(time_local))) as time_span_seconds
+    FROM nginx_access_log
+    GROUP BY remote_addr
+    HAVING COUNT(*) > 5  -- Minimum activity threshold
+)
+SELECT 
+    remote_addr,
+    total_requests,
+    unique_paths,
+    ROUND(error_rate * 100, 2) as error_rate_pct,
+    scanner_ua_count,
+    probe_path_count,
+    ROUND(total_requests::float / NULLIF(time_span_seconds, 0), 3) as requests_per_second,
+    first_seen,
+    last_seen,
+    -- Classification based on multiple indicators
+    CASE 
+        WHEN scanner_ua_count > 0 
+          OR (error_rate > 0.4 AND probe_path_count > 0)
+          OR (total_requests::float / NULLIF(time_span_seconds, 0) > 0.5 AND unique_paths > 5)
+        THEN 'HIGH'
+        WHEN error_rate > 0.2 
+          OR probe_path_count > 0
+          OR unique_paths > 10
+        THEN 'MEDIUM'
+        ELSE 'LOW'
+    END as threat_level,
+    user_agents,
+    paths_tried
+FROM scanner_metrics
+WHERE 
+    scanner_ua_count > 0
+    OR probe_path_count > 0
+    OR error_rate > 0.2
+    OR (total_requests::float / NULLIF(time_span_seconds, 0) > 0.2 AND unique_paths > 5)
+ORDER BY 
+    CASE threat_level 
+        WHEN 'HIGH' THEN 1 
+        WHEN 'MEDIUM' THEN 2 
+        ELSE 3 
+    END,
+    total_requests DESC
+LIMIT 25;
+```
+
+```
+┌────────────────┬────────────────┬──────────────┬────────────────┬──────────────────┬──────────────────┬─────────────────────┬─────────────────────┬─────────────────────┬──────────────┬──────────────────────┬────────────────────────────────────────┐
+│  remote_addr   │ total_requests │ unique_paths │ error_rate_pct │ scanner_ua_count │ probe_path_count │ requests_per_second │     first_seen      │      last_seen      │ threat_level │     user_agents      │              paths_tried               │
+│    varchar     │     int64      │    int64     │     float      │      int64       │      int64       │       double        │      timestamp      │      timestamp      │   varchar    │      varchar[]       │               varchar[]                │
+├────────────────┼────────────────┼──────────────┼────────────────┼──────────────────┼──────────────────┼─────────────────────┼─────────────────────┼─────────────────────┼──────────────┼──────────────────────┼────────────────────────────────────────┤
+│ 94.72.101.21   │          49836 │        12126 │          100.0 │                0 │            19428 │              13.786 │ 2024-11-02 19:29:28 │ 2024-11-02 20:29:43 │ HIGH         │ [Mozilla/5.0 (Maci…  │ [/product/.env.production, /project/…  │
+│ 236.136.121.59 │            217 │           10 │          72.35 │              217 │              112 │               0.001 │ 2024-11-01 00:05:20 │ 2024-11-02 20:11:33 │ HIGH         │ [Mozilla/5.0 (comp…  │ [/.git/config, /api/swagger, /actuat…  │
+│ 237.64.63.208  │            214 │           10 │          71.03 │              214 │              100 │               0.001 │ 2024-11-01 00:12:34 │ 2024-11-02 19:36:50 │ HIGH         │ [Mozilla/5.0 (comp…  │ [/server-status, /.well-known/securi…  │
+│ 79.154.38.75   │            202 │           10 │          74.26 │              202 │               96 │               0.001 │ 2024-11-01 00:05:23 │ 2024-11-02 19:53:26 │ HIGH         │ [Expanse, a Palo A…  │ [/server-status, /.well-known/securi…  │
+│ 189.182.230.22 │            198 │           10 │          72.73 │              198 │               89 │               0.001 │ 2024-11-01 00:02:00 │ 2024-11-02 19:55:56 │ HIGH         │ [Mozilla/5.0 (comp…  │ [/.env, /phpinfo.php, /actuator/heal…  │
+│ 32.20.221.188  │            193 │           10 │          75.13 │              193 │               93 │               0.001 │ 2024-11-01 00:39:00 │ 2024-11-02 19:56:52 │ HIGH         │ [Mozilla/5.0 (comp…  │ [/admin, /.well-known/security.txt, …  │
+│ 112.254.36.175 │            180 │           45 │          100.0 │                0 │                4 │                20.0 │ 2024-11-02 15:17:01 │ 2024-11-02 15:17:10 │ HIGH         │ [Custom-AsyncHttpC…  │ [/phpunit/src/Util/PHP/eval-stdin.ph…  │
+│ 136.144.19.42  │            140 │           18 │          97.14 │                0 │              112 │                3.59 │ 2024-11-02 19:18:31 │ 2024-11-02 19:19:10 │ HIGH         │ [Mozilla/5.0 (X11;…  │ [/, /.aws/config, /.env, /services/c…  │
+│ 136.144.19.175 │            104 │           13 │          100.0 │                0 │              104 │               2.476 │ 2024-11-02 19:19:50 │ 2024-11-02 19:20:32 │ HIGH         │ [Mozilla/5.0 (X11;…  │ [/system/.env, /environment/.env, /e…  │
+│ 123.58.207.127 │             24 │            6 │          83.33 │                0 │                0 │               0.828 │ 2024-11-02 14:21:00 │ 2024-11-02 14:21:29 │ HIGH         │ [Mozilla/5.0 (Maci…  │ [/favicon.ico, , /, /sitemap.xml, /c…  │
+│ 167.94.145.109 │             16 │            3 │           50.0 │                8 │                0 │                 3.2 │ 2024-11-02 01:18:23 │ 2024-11-02 01:18:28 │ HIGH         │ [-, Mozilla/5.0 (c…  │ [/favicon.ico, *, /]                   │
+│ 167.94.138.50  │             16 │            3 │           50.0 │                8 │                0 │               1.143 │ 2024-11-02 21:06:23 │ 2024-11-02 21:06:37 │ HIGH         │ [Mozilla/5.0 (comp…  │ [*, /, /favicon.ico]                   │
+│ 45.140.188.18  │              8 │            2 │          100.0 │                0 │                4 │                     │ 2024-11-02 10:39:55 │ 2024-11-02 10:39:55 │ HIGH         │ [Mozilla/5.0 (X11;…  │ [, /boaform/admin/formLogin]           │
+│ 87.120.113.56  │              8 │            1 │          100.0 │                0 │                8 │                 0.0 │ 2024-11-02 09:06:11 │ 2024-11-02 22:48:41 │ HIGH         │ [Mozilla/5.0 (Maci…  │ [/.env]                                │
+│ 178.159.37.59  │              8 │            2 │          100.0 │                0 │                8 │               0.001 │ 2024-11-02 00:49:50 │ 2024-11-02 02:35:43 │ HIGH         │ [Mozilla/5.0 (Maci…  │ [/.gitlab-ci.yml, /.env]               │
+│ 103.145.255.68 │              8 │            2 │          100.0 │                0 │                4 │                 8.0 │ 2024-11-02 23:59:17 │ 2024-11-02 23:59:18 │ HIGH         │ [Mozilla/5.0 (X11;…  │ [/, /.env]                             │
+│ 141.98.11.178  │             28 │            2 │          42.86 │                0 │                0 │               0.001 │ 2024-11-02 12:31:47 │ 2024-11-02 22:33:13 │ MEDIUM       │ [Go-http-client/1.…  │ [/cgi-bin/luci/;stok=/locale, /]       │
+│ 198.44.237.38  │             24 │            3 │           50.0 │                0 │                0 │               0.001 │ 2024-11-02 03:05:27 │ 2024-11-02 08:29:14 │ MEDIUM       │ [Mozilla/5.0 (Wind…  │ [5\xD5\xD1n\x8E`>7DQ\x0FC\xFD5\xF4\x…  │
+│ 148.153.45.238 │             24 │            6 │          100.0 │                0 │                0 │                     │ 2024-11-02 06:52:23 │ 2024-11-02 06:52:23 │ MEDIUM       │ [Mozilla/5.0 (Maci…  │ [/NJKz, /aab9, /jquery-3.3.1.slim.mi…  │
+│ 71.6.146.130   │             20 │            5 │           80.0 │                0 │                0 │               6.667 │ 2024-11-02 23:04:17 │ 2024-11-02 23:04:20 │ MEDIUM       │ [Mozilla/5.0 (Wind…  │ [/favicon.ico, /, /sitemap.xml, /.we…  │
+│ 5.8.11.202     │             16 │            2 │           25.0 │                0 │                0 │                 0.0 │ 2024-11-02 06:03:57 │ 2024-11-02 21:40:27 │ MEDIUM       │ [Mozilla/5.0 (Wind…  │ [\x84\xB4,\x85\xAFn\xE3Y\xBBbhl\xFF(…  │
+│ 178.215.238.68 │             16 │            1 │          100.0 │                0 │                0 │                 0.0 │ 2024-11-02 00:34:11 │ 2024-11-02 23:24:09 │ MEDIUM       │ [Hello World]        │ [/login.rsp]                           │
+│ 93.174.93.12   │             16 │            2 │           50.0 │                0 │                0 │                 0.0 │ 2024-11-02 02:22:34 │ 2024-11-02 22:46:03 │ MEDIUM       │ [-, Mozilla/5.0 (X…  │ [\x84\xB4,\x85\xAFn\xE3Y\xBBbhl\xFF(…  │
+│ 203.0.113.175  │             12 │            6 │          33.33 │                0 │                0 │               0.003 │ 2024-11-01 00:13:02 │ 2024-11-01 01:21:41 │ MEDIUM       │ [Mozilla/5.0 (Wind…  │ [/favicon.ico, /login, /dashboard, /…  │
+│ 80.82.77.202   │             12 │            2 │          33.33 │                0 │                0 │                 0.0 │ 2024-11-02 05:17:06 │ 2024-11-02 21:26:59 │ MEDIUM       │ [Mozilla/5.0 (iPho…  │ [\x84\xB4,\x85\xAFn\xE3Y\xBBbhl\xFF(…  │
+├────────────────┴────────────────┴──────────────┴────────────────┴──────────────────┴──────────────────┴─────────────────────┴─────────────────────┴─────────────────────┴──────────────┴──────────────────────┴────────────────────────────────────────┤
+```
+
 
 ## Developers
 
