@@ -8,12 +8,12 @@ import (
 )
 
 type Plugin struct {
-	plugin.PluginBase
+	plugin.PluginImpl
 }
 
 func NewPlugin() (plugin.TailpipePlugin, error) {
 	p := &Plugin{
-		PluginBase: plugin.NewPluginBase("nginx", config.NewNginxConnection),
+		PluginImpl: plugin.NewPluginImpl("nginx", config.NewNginxConnection),
 	}
 
 	err := p.RegisterResources(
