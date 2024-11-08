@@ -82,12 +82,10 @@ func (c *AccessLogTable) EnrichRow(row *rows.AccessLog, sourceEnrichmentFields *
 
 	// Record standardization
 	row.TpID = xid.New().String()
-	row.TpIngestTimestamp = helpers.UnixMillis(time.Now().UnixNano() / int64(time.Millisecond))
-	row.TpTimestamp = helpers.UnixMillis(row.Timestamp.UnixNano() / int64(time.Millisecond))
-	row.TpSourceType = "nginx_access_log" // TODO: #refactor move to source?
+	row.TpIngestTimestamp = time.Now()
+	row.TpTimestamp = *row.Timestamp
 
 	// Hive Fields
-	row.TpPartition = c.Identifier()
 	row.TpIndex = c.Identifier() // TODO: #refactor figure out how to get connection
 	row.TpDate = row.Timestamp.Format("2006-01-02")
 
