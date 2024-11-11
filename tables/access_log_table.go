@@ -5,11 +5,11 @@ import (
 	"time"
 
 	"github.com/rs/xid"
+
 	"github.com/turbot/tailpipe-plugin-nginx/config"
 	"github.com/turbot/tailpipe-plugin-nginx/rows"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
-	"github.com/turbot/tailpipe-plugin-sdk/helpers"
 	"github.com/turbot/tailpipe-plugin-sdk/parse"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 	"github.com/turbot/tailpipe-plugin-sdk/table"
