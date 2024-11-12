@@ -3,6 +3,7 @@ package tables
 import (
 	"context"
 	"net/url"
+    "path/filepath"
 	"strings"
 	"time"
 
@@ -38,8 +39,8 @@ func (c *AccessLogTable) Init(ctx context.Context, connectionSchemaProvider tabl
 	if err := c.TableImpl.Init(ctx, connectionSchemaProvider, req); err != nil {
 		return err
 	}
-
-	c.initMapper()
+    
+    c.initMapper()
 	return nil
 }
 
@@ -89,7 +90,10 @@ func (c *AccessLogTable) EnrichRow(row *rows.AccessLog, sourceEnrichmentFields *
     }
 
     // Hive Fields
-    row.TpIndex = c.Identifier()
+    //row.TpIndex = c.Identifier()
+    filename := filepath.Base(*row.TpSourceLocation)
+    row.TpIndex = filename
+
 
     // IP handling
     if row.RemoteAddr != nil {
