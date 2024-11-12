@@ -3,7 +3,7 @@ package tables
 import (
 	"context"
 	"net/url"
-    "path/filepath"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -39,8 +39,8 @@ func (c *AccessLogTable) Init(ctx context.Context, connectionSchemaProvider tabl
 	if err := c.TableImpl.Init(ctx, connectionSchemaProvider, req); err != nil {
 		return err
 	}
-    
-    c.initMapper()
+
+	c.initMapper()
 	return nil
 }
 
@@ -74,63 +74,62 @@ func (c *AccessLogTable) GetConfigSchema() parse.Config {
 }
 
 func (c *AccessLogTable) EnrichRow(row *rows.AccessLog, sourceEnrichmentFields *enrichment.CommonFields) (*rows.AccessLog, error) {
-    // Build record and add any source enrichment fields
-    if sourceEnrichmentFields != nil {
-        row.CommonFields = *sourceEnrichmentFields
-    }
+	// Build record and add any source enrichment fields
+	if sourceEnrichmentFields != nil {
+		row.CommonFields = *sourceEnrichmentFields
+	}
 
-    // Record standardization
-    row.TpID = xid.New().String()
-    row.TpIngestTimestamp = time.Now()
-    
-    // Timestamp checks
-    if row.Timestamp != nil {
-        row.TpTimestamp = *row.Timestamp
-        row.TpDate = row.Timestamp.Format("2006-01-02")
-    }
+	// Record standardization
+	row.TpID = xid.New().String()
+	row.TpIngestTimestamp = time.Now()
 
-    // Hive Fields
-    //row.TpIndex = c.Identifier()
-    filename := filepath.Base(*row.TpSourceLocation)
-    row.TpIndex = filename
+	// Timestamp checks
+	if row.Timestamp != nil {
+		row.TpTimestamp = *row.Timestamp
+		row.TpDate = row.Timestamp.Format("2006-01-02")
+	}
 
+	// Hive Fields
+	//row.TpIndex = c.Identifier()
+	filename := filepath.Base(*row.TpSourceLocation)
+	row.TpIndex = filename
 
-    // IP handling
-    if row.RemoteAddr != nil {
-        row.TpSourceIP = row.RemoteAddr
-        row.TpIps = []string{*row.RemoteAddr}
-    }
+	// IP handling
+	if row.RemoteAddr != nil {
+		row.TpSourceIP = row.RemoteAddr
+		row.TpIps = []string{*row.RemoteAddr}
+	}
 
-    // Tags enrichment
-    tags := make([]string, 0)
-    if row.Method != nil {
-        tags = append(tags, "method:"+*row.Method)
-    }
-    if row.Status != nil {
-        if *row.Status >= 400 {
-            tags = append(tags, "error")
-            if *row.Status >= 500 {
-                tags = append(tags, "server_error")
-            } else {
-                tags = append(tags, "client_error")
-            }
-        }
-    }
-    if len(tags) > 0 {
-        row.TpTags = tags
-    }
+	// Tags enrichment
+	tags := make([]string, 0)
+	if row.Method != nil {
+		tags = append(tags, "method:"+*row.Method)
+	}
+	if row.Status != nil {
+		if *row.Status >= 400 {
+			tags = append(tags, "error")
+			if *row.Status >= 500 {
+				tags = append(tags, "server_error")
+			} else {
+				tags = append(tags, "client_error")
+			}
+		}
+	}
+	if len(tags) > 0 {
+		row.TpTags = tags
+	}
 
-    // Domain extraction
-    if row.Path != nil {
-        // Extract domain from path if it looks like a full URL
-        if strings.HasPrefix(*row.Path, "http://") || strings.HasPrefix(*row.Path, "https://") {
-            if u, err := url.Parse(*row.Path); err == nil && u.Hostname() != "" {
-                row.TpDomains = append(row.TpDomains, u.Hostname())
-            }
-        }
-        // Add path to AKAs
-        row.TpAkas = append(row.TpAkas, *row.Path)
-    }
+	// Domain extraction
+	if row.Path != nil {
+		// Extract domain from path if it looks like a full URL
+		if strings.HasPrefix(*row.Path, "http://") || strings.HasPrefix(*row.Path, "https://") {
+			if u, err := url.Parse(*row.Path); err == nil && u.Hostname() != "" {
+				row.TpDomains = append(row.TpDomains, u.Hostname())
+			}
+		}
+		// Add path to AKAs
+		row.TpAkas = append(row.TpAkas, *row.Path)
+	}
 
-    return row, nil
+	return row, nil
 }
