@@ -89,5 +89,27 @@ func (c *AccessLogTable) EnrichRow(row *rows.AccessLog, sourceEnrichmentFields *
 	row.TpIndex = c.Identifier() // TODO: #refactor figure out how to get connection
 	row.TpDate = row.Timestamp.Format("2006-01-02")
 
+	row.TpSourceIP = row.RemoteAddr
+	row.TpIps = []string{*row.RemoteAddr}
+
+	tags := make([]string, 0)
+	if row.Method != nil {
+		tags = append(tags, "method:"+*row.Method)
+	}
+
+	if row.Status != nil {
+		if *row.Status >= 400 {
+			tags = append(tags, "error")
+			if *row.Status >= 500 {
+				tags = append(tags, "server_error")
+			} else {
+				tags = append(tags, "client_error")
+			}
+		}
+	}
+	if len(tags) > 0 {
+		row.TpTags = tags
+	}
+
 	return row, nil
 }
