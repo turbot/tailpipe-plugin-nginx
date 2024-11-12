@@ -1,7 +1,6 @@
 package rows
 
 import (
-	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -81,20 +80,6 @@ func (l *AccessLog) InitialiseFromMap(m map[string]string) error {
 				l.Path = &path
 				l.HttpVersion = &version
 
-				// While we're here, let's add some enrichment
-				// Add method tag
-				l.TpTags = append(l.TpTags, "method:"+method)
-				// Add status-based tags in the status case below
-
-				// Extract domain from path if it looks like a full URL
-				if strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://") {
-					if u, err := url.Parse(path); err == nil && u.Hostname() != "" {
-						l.TpDomains = append(l.TpDomains, u.Hostname())
-					}
-				}
-
-				// Add path to AKAs
-				l.TpAkas = append(l.TpAkas, path)
 			}
 		case "status":
 			status, err := strconv.Atoi(value)
