@@ -13,7 +13,7 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
 	"github.com/turbot/tailpipe-plugin-sdk/constants"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
-	"github.com/turbot/tailpipe-plugin-sdk/parse"
+	//"github.com/turbot/tailpipe-plugin-sdk/parse"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 	"github.com/turbot/tailpipe-plugin-sdk/table"
 	"github.com/turbot/tailpipe-plugin-sdk/types"
@@ -65,9 +65,10 @@ func (c *AccessLogTable) GetRowSchema() types.RowStruct {
 	return rows.NewAccessLog()
 }
 
+/* was not being used
 func (c *AccessLogTable) GetConfigSchema() parse.Config {
 	return &AccessLogTableConfig{}
-}
+}*/
 
 func (c *AccessLogTable) EnrichRow(row *rows.AccessLog, sourceEnrichmentFields *enrichment.CommonFields) (*rows.AccessLog, error) {
 	// Build record and add any source enrichment fields
@@ -116,7 +117,6 @@ func (c *AccessLogTable) EnrichRow(row *rows.AccessLog, sourceEnrichmentFields *
 	}
 
 	// Users
-
 	if *row.RemoteUser != "" && *row.RemoteUser != "-" {
 		row.TpUsernames = append(row.TpUsernames, *row.RemoteUser)
 	}
