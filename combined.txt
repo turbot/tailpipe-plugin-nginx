@@ -1,0 +1,314 @@
+// ====== ./nginx/plugin.go ======
+package nginx
+
+import (
+	"github.com/turbot/tailpipe-plugin-nginx/config"
+	"github.com/turbot/tailpipe-plugin-nginx/tables"
+	"github.com/turbot/tailpipe-plugin-sdk/plugin"
+	"github.com/turbot/tailpipe-plugin-sdk/table"
+)
+
+type Plugin struct {
+	plugin.PluginImpl
+}
+
+func NewPlugin() (plugin.TailpipePlugin, error) {
+	p := &Plugin{
+		PluginImpl: plugin.NewPluginImpl("nginx", config.NewNginxConnection),
+	}
+
+	// register the tables, sources and mappers that we provide
+	resources := &plugin.ResourceFunctions{
+		Tables:  []func() table.Table{tables.NewNginxAccessLogTable},
+	}
+
+	if err := p.RegisterResources(resources); err != nil {
+		return nil, err
+	}
+
+	return p, nil
+}
+// ====== ./mappers/nginx_access_log_mapper.go ======
+package mappers
+
+import (
+	"context"
+	"fmt"
+	"log/slog"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/turbot/tailpipe-plugin-nginx/rows"
+)
+
+type NginxAccessLogMapper struct{}
+
+func NewNginxAccessLogMapper() *NginxAccessLogMapper {
+	return &NginxAccessLogMapper{}
+}
+
+var nginxRegex = regexp.MustCompile(`^(?P<remote_addr>[^ ]+) (?P<remote_user>[^ ]+) (?P<local_user>[^ ]+) \[(?P<time_local>[^\]]+)\] "(?P<method>[A-Z]+) (?P<uri>[^ ]+) HTTP/(?P<http_version>[^ ]+)" (?P<status>\d{3}) (?P<bytes_sent>\d+) "(?P<referer>[^"]*)" "(?P<user_agent>[^"]*)"`)
+
+func (m *NginxAccessLogMapper) Map(_ context.Context, data any) ([]*rows.NginxAccessLog, error) {
+	slog.Error("Line", "", "")
+	lineStr, ok := data.(string)
+
+	if !ok {
+		return nil, fmt.Errorf("expected string, got %T", data)
+	}
+
+	logEntry := rows.NewNginxAccessLog()
+
+	// Attempt to match the line with the regex
+	matches := nginxRegex.FindStringSubmatch(lineStr)
+	if matches == nil {
+		slog.Error("Line does not match expected NGINX format", "lineStr", lineStr)
+	}
+
+	// Capture the names of the groups for better debugging
+	names := nginxRegex.SubexpNames()
+	fields := make(map[string]string)
+
+	// Populate the fields map and log each captured group
+	for i, match := range matches {
+		if i != 0 && names[i] != "" { // Skip the full match
+			fields[names[i]] = match
+		}
+	}
+
+	// Parse timestamp
+	timeLocal, err := time.Parse("02/Jan/2006:15:04:05 -0700", fields["time_local"])
+	if err != nil {
+		slog.Error("Error parsing timestamp", "time_local", fields["time_local"], "error", err)
+	}
+
+	// Parse status code
+	status := 0
+	if fields["status"] != "" {
+		status, err = strconv.Atoi(fields["status"])
+		if err != nil {
+			slog.Error("Error parsing status code", "status", fields["status"], "error", err)
+		}
+	}
+
+	// Parse bytes sent
+	bytesSent := int64(0)
+	if fields["bytes_sent"] != "" && fields["bytes_sent"] != "-" {
+		bytesSent, err = strconv.ParseInt(fields["bytes_sent"], 10, 64)
+		if err != nil {
+			slog.Error("Error parsing bytes sent", "bytes_sent", fields["bytes_sent"], "error", err)
+		}
+	}
+
+	// Process remote user
+	remoteUser := fields["remote_user"]
+	if remoteUser == "-" {
+		remoteUser = ""
+	}
+
+	// Extract protocol from request (optional field)
+	protocol := ""
+	uri := fields["uri"]
+	if strings.Contains(uri, " HTTP/") {
+		parts := strings.SplitN(uri, " HTTP/", 2)
+		if len(parts) == 2 {
+			uri = parts[0] // Update URI to exclude protocol
+			protocol = "HTTP/" + parts[1]
+			slog.Debug("Extracted protocol", "protocol", protocol)
+		}
+	}
+
+	// Build log entry and log the final structured entry
+	logEntry.RemoteAddr = fields["remote_addr"]
+	logEntry.RemoteUser = fields["remote_addr"]
+	logEntry.TimeLocal = timeLocal
+	logEntry.Method = fields["method"]
+	logEntry.URI = uri
+	logEntry.Protocol = protocol
+	logEntry.Status = status
+	logEntry.BytesSent = bytesSent
+	logEntry.Referer = fields["referer"]
+	logEntry.UserAgent = fields["user_agent"]
+	logEntry.ServerName = "default" // Default since server name isn't in log format
+
+	return []*rows.NginxAccessLog{logEntry}, nil
+}
+
+func (m *NginxAccessLogMapper) Identifier() string {
+	return "nginx_log_mapper"
+}
+
+// ====== ./main.go ======
+package main
+
+import (
+	"log/slog"
+
+	"github.com/turbot/tailpipe-plugin-nginx/nginx"
+	"github.com/turbot/tailpipe-plugin-sdk/plugin"
+)
+
+func main() {
+	// Initialize plugin options
+	err := plugin.Serve(&plugin.ServeOpts{
+		PluginFunc: nginx.NewPlugin,
+	})
+
+	if err != nil {
+		slog.Error("Error starting plugin", "error", err)
+	}
+}
+// ====== ./tables/nginx_access_log_table_config.go ======
+package tables
+
+type NginxAccessLogTableConfig struct {
+}
+
+func (c *NginxAccessLogTableConfig) Validate() error {
+	return nil
+}
+// ====== ./tables/nginx_access_log_table.go ======
+package tables
+
+import (
+	"context"
+	"github.com/turbot/tailpipe-plugin-nginx/mappers"
+
+	"github.com/turbot/tailpipe-plugin-nginx/config"
+	"github.com/turbot/tailpipe-plugin-nginx/rows"
+	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
+	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
+	"github.com/turbot/tailpipe-plugin-sdk/parse"
+	"github.com/turbot/tailpipe-plugin-sdk/row_source"
+	"github.com/turbot/tailpipe-plugin-sdk/table"
+	"github.com/turbot/tailpipe-plugin-sdk/types"
+
+)
+
+type NginxAccessLogTable struct {
+	table.TableImpl[*rows.NginxAccessLog, *NginxAccessLogTableConfig, *config.NginxConnection]
+}
+
+func NewNginxAccessLogTable() table.Table {
+	return &NginxAccessLogTable{} 
+}
+
+func (t *NginxAccessLogTable) Init(ctx context.Context, connectionSchemaProvider table.ConnectionSchemaProvider, req *types.CollectRequest) error {
+	if err := t.TableImpl.Init(ctx, connectionSchemaProvider, req); err != nil {
+		return err
+	}
+
+	// Set the mapper
+	t.Mapper = mappers.NewNginxAccessLogMapper()
+	return nil
+}
+
+func (t *NginxAccessLogTable) Identifier() string {
+	return "nginx_access_log"
+}
+
+func (t *NginxAccessLogTable) GetRowSchema() any {
+	return &rows.NginxAccessLog{}
+}
+
+func (t *NginxAccessLogTable) GetConfigSchema() parse.Config {
+	return &NginxAccessLogTableConfig{}
+}
+
+func (t *NginxAccessLogTable) GetSourceOptions(sourceType string) []row_source.RowSourceOption {
+	return []row_source.RowSourceOption{
+		artifact_source.WithRowPerLine(),
+	}
+}
+
+func (t *NginxAccessLogTable) EnrichRow(row *rows.NginxAccessLog, sourceEnrichmentFields *enrichment.CommonFields) (*rows.NginxAccessLog, error) {
+	if err := row.Row(sourceEnrichmentFields); err != nil {
+		return nil, err
+	}
+	return row, nil
+}
+
+// ====== ./rows/nginx-access-log.go ======
+package rows
+
+import (
+	"time"
+
+	"github.com/rs/xid"
+	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
+)
+
+
+type NginxAccessLog struct {
+	enrichment.CommonFields
+
+    // Core NGINX fields
+    RemoteAddr    string    `json:"remote_addr"`
+    RemoteUser    string    `json:"remote_user"`
+    TimeLocal     time.Time `json:"time_local"`
+    Method        string    `json:"method"`
+    URI           string    `json:"uri"`
+    Protocol      string    `json:"protocol"`
+    Status        int       `json:"status"`
+    BytesSent     int64     `json:"bytes_sent"`
+    Referer       string    `json:"referer"`
+    UserAgent     string    `json:"user_agent"`
+    ServerName    string    `json:"server_name"`
+
+    // Optional extended fields
+    Request     string `json:"request,omitempty"`
+    TimeIso8601 string `json:"time_iso8601,omitempty"`
+
+    // Time component fields for partitioning and querying
+    TpYear  int `json:"tp_year"`
+    TpMonth int `json:"tp_month"`
+    TpDay   int `json:"tp_day"`
+}
+
+func NewNginxAccessLog() *NginxAccessLog {
+	return &NginxAccessLog{}
+}
+
+func (l *NginxAccessLog) EnrichRow(sourceEnrichmentFields *enrichment.CommonFields) error {
+	// Add source enrichment fields if provided
+	if sourceEnrichmentFields != nil {
+		l.CommonFields = *sourceEnrichmentFields
+	}
+
+	// Standard record enrichment
+	l.TpID = xid.New().String()
+	l.TpIngestTimestamp = time.Now()
+	// Use source name as the index
+	l.TpIndex = l.TpSourceName
+
+	return nil
+}
+
+
+
+// ====== ./config/nginx.go ======
+package config
+
+import "github.com/turbot/tailpipe-plugin-sdk/parse"
+
+type NginxConnection struct {
+	// Optional common settings that affect all sources using this connection
+	DefaultLogFormat  string `json:"default_log_format,omitempty" hcl:"default_log_format,optional"`
+	DefaultTimezone   string `json:"default_timezone,omitempty" hcl:"default_timezone,optional"`
+	DefaultServerName string `json:"default_server_name,omitempty" hcl:"default_server_name,optional"`
+}
+
+func NewNginxConnection() parse.Config {
+	return &NginxConnection{
+		// Set default values
+		DefaultLogFormat:  "combined",
+		DefaultTimezone:   "UTC",
+		DefaultServerName: "default",
+	}
+}
+
+func (c *NginxConnection) Validate() error {
+	return nil
+}

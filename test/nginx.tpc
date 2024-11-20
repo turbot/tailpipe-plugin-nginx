@@ -1,0 +1,14 @@
+partition "nginx_access_log" "web_servers" {
+    plugin = "nginx"
+    source "nginx_access_log_file" {
+        log_path = "/home/jon/tpsrc/tailpipe-plugin-nginx/test/test.log" # combination of auto-generated sample.log and real hn_4.log"
+    }
+}
+
+partition "nginx_access_log" "t1595" {
+    plugin = "nginx"
+    source "nginx_access_log_file" {
+        log_path = "/home/jon/tpsrc/tailpipe-plugin-nginx/test/t1595/t1595.log"
+    }
+}
+
