@@ -9,21 +9,21 @@ import (
 )
 
 type AccessLog struct {
-    enrichment.CommonFields
+	enrichment.CommonFields
 
-    RemoteAddr    *string    `json:"remote_addr,omitempty"`
-    RemoteUser    *string    `json:"remote_user,omitempty"`
-    TimeLocal     *string    `json:"time_local,omitempty"`
-    TimeIso8601   *string    `json:"time_iso_8601,omitempty"`
-    Request       *string    `json:"request,omitempty"`
-    Method        *string    `json:"method,omitempty"`
-    Path          *string    `json:"path,omitempty"`
-    HttpVersion   *string    `json:"http_version,omitempty"`
-    Status        *int       `json:"status,omitempty"`
-    BodyBytesSent *int       `json:"body_bytes_sent,omitempty"`
-    HttpReferer   *string    `json:"http_referer,omitempty"`
-    HttpUserAgent *string    `json:"http_user_agent,omitempty"`
-    Timestamp     *time.Time `json:"timestamp,omitempty"`
+	RemoteAddr    *string    `json:"remote_addr,omitempty"`
+	RemoteUser    *string    `json:"remote_user,omitempty"`
+	TimeLocal     *string    `json:"time_local,omitempty"`
+	TimeIso8601   *string    `json:"time_iso_8601,omitempty"`
+	Request       *string    `json:"request,omitempty"`
+	Method        *string    `json:"method,omitempty"`
+	Path          *string    `json:"path,omitempty"`
+	HttpVersion   *string    `json:"http_version,omitempty"`
+	Status        *int       `json:"status,omitempty"`
+	BodyBytesSent *int       `json:"body_bytes_sent,omitempty"`
+	HttpReferer   *string    `json:"http_referer,omitempty"`
+	HttpUserAgent *string    `json:"http_user_agent,omitempty"`
+	Timestamp     *time.Time `json:"timestamp,omitempty"`
 }
 
 func NewAccessLog() *AccessLog {
@@ -35,13 +35,8 @@ func (l *AccessLog) InitialiseFromMap(m map[string]string) error {
 		switch key {
 		case "remote_addr":
 			l.RemoteAddr = &value
-			l.TpSourceIP = &value
-			l.TpIps = append(l.TpIps, value)
 		case "remote_user":
 			l.RemoteUser = &value
-			if value != "" && value != "-" {
-				l.TpUsernames = append(l.TpUsernames, value)
-			}
 		case "time_local":
 			l.TimeLocal = &value
 			t, err := time.Parse("02/Jan/2006:15:04:05 -0700", value)
@@ -79,23 +74,7 @@ func (l *AccessLog) InitialiseFromMap(m map[string]string) error {
 				l.Method = &method
 				l.Path = &path
 				l.HttpVersion = &version
-
 			}
-		case "status":
-			status, err := strconv.Atoi(value)
-			if err != nil {
-				return err
-			}
-			l.Status = &status
-			// Add status-based tags
-			if status >= 400 {
-				l.TpTags = append(l.TpTags, "error")
-				if status >= 500 {
-					l.TpTags = append(l.TpTags, "server_error")
-				} else {
-					l.TpTags = append(l.TpTags, "client_error")
-				}
-			}		
 		}
 	}
 	return nil

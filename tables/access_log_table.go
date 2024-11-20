@@ -115,6 +115,12 @@ func (c *AccessLogTable) EnrichRow(row *rows.AccessLog, sourceEnrichmentFields *
 		row.TpTags = tags
 	}
 
+	// Users
+
+	if *row.RemoteUser != "" && *row.RemoteUser != "-" {
+		row.TpUsernames = append(row.TpUsernames, *row.RemoteUser)
+	}
+
 	// Domain extraction
 	if row.Path != nil {
 		// Extract domain from path if it looks like a full URL
