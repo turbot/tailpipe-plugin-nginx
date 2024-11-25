@@ -13,3 +13,7 @@ func (a *AccessLogTableConfig) Validate() error {
 
 	return nil
 }
+
+func (a *AccessLogTableConfig) Identifier() string {
+	return AccessLogTableIdentifier
+}

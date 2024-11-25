@@ -5,7 +5,6 @@ import (
 
 	"github.com/rs/xid"
 
-	"github.com/turbot/tailpipe-plugin-nginx/config"
 	"github.com/turbot/tailpipe-plugin-nginx/rows"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
 	"github.com/turbot/tailpipe-plugin-sdk/constants"
@@ -19,24 +18,27 @@ const AccessLogTableIdentifier = "nginx_access_log"
 
 // init registers the table
 func init() {
-	table.RegisterTable[*rows.AccessLog, *AccessLogTable]()
+	// Register the table, with type parameters:
+	// 1. row struct
+	// 2. table config struct
+	// 3. table implementation
+	table.RegisterTable[*rows.AccessLog, *AccessLogTableConfig, *AccessLogTable]()
 }
 
 // AccessLogTable - table for nginx access logs
 type AccessLogTable struct {
-	table.TableImpl[*rows.AccessLog, *AccessLogTableConfig, *config.NginxConnection]
 }
 
 func (c *AccessLogTable) Identifier() string {
 	return AccessLogTableIdentifier
 }
 
-func (c *AccessLogTable) SupportedSources() []*table.SourceMetadata[*rows.AccessLog] {
+func (c *AccessLogTable) SupportedSources(config *AccessLogTableConfig) []*table.SourceMetadata[*rows.AccessLog] {
 	return []*table.SourceMetadata[*rows.AccessLog]{
 		{
 			// any artifact source
 			SourceName: constants.ArtifactSourceIdentifier,
-			MapperFunc: c.initMapper(),
+			MapperFunc: c.initMapper(config),
 			Options: []row_source.RowSourceOption{
 				artifact_source.WithRowPerLine(),
 			},
@@ -44,10 +46,10 @@ func (c *AccessLogTable) SupportedSources() []*table.SourceMetadata[*rows.Access
 	}
 }
 
-func (c *AccessLogTable) initMapper() func() table.Mapper[*rows.AccessLog] {
+func (c *AccessLogTable) initMapper(config *AccessLogTableConfig) func() table.Mapper[*rows.AccessLog] {
 	logFormat := defaultLogFormat
-	if c.Config != nil && c.Config.LogFormat != nil {
-		logFormat = *c.Config.LogFormat
+	if config != nil && config.LogFormat != nil {
+		logFormat = *config.LogFormat
 	}
 
 	f := func() table.Mapper[*rows.AccessLog] {

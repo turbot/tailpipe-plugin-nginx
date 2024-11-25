@@ -20,7 +20,7 @@ func NewPlugin() (_ plugin.TailpipePlugin, err error) {
 	}()
 
 	p := &Plugin{
-		PluginImpl: plugin.NewPluginImpl[*config.NginxConnection]("nginx"),
+		PluginImpl: plugin.NewPluginImpl(config.PluginName),
 	}
 
 	return p, nil
