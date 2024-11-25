@@ -2,6 +2,7 @@ package rows
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
@@ -15,6 +16,9 @@ type AccessLog struct {
 	TimeLocal     *string    `json:"time_local,omitempty"`
 	TimeIso8601   *string    `json:"time_iso8601,omitempty"`
 	Request       *string    `json:"request,omitempty"`
+	Method        *string    `json:"method,omitempty"`
+	Path          *string    `json:"path,omitempty"`
+	HttpVersion   *string    `json:"http_version,omitempty"`
 	Status        *int       `json:"status,omitempty"`
 	BodyBytesSent *int       `json:"body_bytes_sent,omitempty"`
 	HttpReferer   *string    `json:"http_referer,omitempty"`
@@ -56,6 +60,16 @@ func (l *AccessLog) InitialiseFromMap(m map[string]string) error {
 			l.Timestamp = &t
 		case "request":
 			l.Request = &value
+			// Split "GET /login HTTP/1.1" into components
+			parts := strings.SplitN(value, " ", 3)
+			if len(parts) == 3 {
+				method := parts[0]
+				path := parts[1]
+				version := strings.TrimPrefix(parts[2], "HTTP/")
+				l.Method = &method
+				l.Path = &path
+				l.HttpVersion = &version
+			}
 		case "status":
 			status, err := strconv.Atoi(value)
 			if err != nil {
