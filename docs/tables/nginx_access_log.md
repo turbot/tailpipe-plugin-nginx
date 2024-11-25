@@ -1,7 +1,23 @@
 # Access Log Table
 
 > [!NOTE]
-> To run these against generated test data:
+> To collect from multiple servers in a partition called `dev` your `nginx.tpc` would look like this.
+>git d
+> ```
+> partition "nginx_access_log" "dev" {
+>    source "file_system"  {
+>        paths = [
+>          "/path/to/logs/dev1",
+>          "/path/to/logs/dev2"
+>          ]
+>        extensions = [".log", ".1", ".gz"]
+>    }
+>}
+>
+> You could add another partition, `prod`, in  similar way.
+
+> [!NOTE]
+> To run these sample queries against generated test data:
 >
 > ```
 >  cd ../../tests
