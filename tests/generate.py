@@ -5,6 +5,37 @@ import uuid
 import pandas as pd
 import hashlib
 
+def create_request_details(method, path, http_version):
+    path_no_query = path.split('?')[0]
+    
+    # Handle query parameters
+    query_params = {}
+    if '?' in path:
+        query_part = path.split('?')[1]
+        for param in query_part.split('&'):
+            if '=' in param:
+                key, value = param.split('=', 1)
+                query_params[key] = value
+
+    # Handle path segments
+    path_segments = [segment for segment in path_no_query.strip('/').split('/') if segment]
+    if not path_segments:
+        path_segments = ["/"]
+
+    # Get extension if present
+    extension = None
+    if path_segments and '.' in path_segments[-1]:
+        extension = path_segments[-1].split('.')[-1]
+
+    return {
+        'method': method,
+        'path': path,
+        'http_version': http_version,
+        'query_params': query_params,
+        'path_segments': path_segments,
+        'extension': extension
+    }
+
 def generate_nginx_logs(num_lines=500000, start_date=datetime(2024, 11, 1)):
     # Define some constants
     ATTACK_PERCENTAGE = 0.15  # 15% of traffic will be attacks
@@ -120,7 +151,6 @@ def generate_nginx_logs(num_lines=500000, start_date=datetime(2024, 11, 1)):
             sequence = (random.sample(attack['paths'], sequence_length - 1) + 
                       [random.choice(normal_paths)])
         else:
-            # Ensure we don't try to sample more paths than available
             sequence = random.sample(attack['paths'], sequence_length)
 
         user_agent = random.choice(attack['user_agents'])
@@ -143,7 +173,7 @@ def generate_nginx_logs(num_lines=500000, start_date=datetime(2024, 11, 1)):
                 'tp_source_ip': attacker_ip,
                 'tp_destination_ip': None,
                 'tp_source_name': None,
-                'tp_source_location': '/home/jon/tpsrc/tailpipe-plugin-nginx/tests/dev1.log',
+                'tp_source_location': '/home/jon/tpsrc/tailpipe-plugin-nginx/tests/dev1/nginx/access.log',
                 'tp_akas': [path],
                 'tp_ips': [attacker_ip],
                 'tp_tags': [f"method:{method}", f"attack:{attack['name']}"],
@@ -155,6 +185,7 @@ def generate_nginx_logs(num_lines=500000, start_date=datetime(2024, 11, 1)):
                 'time_local': timestamp.strftime('%d/%b/%Y:%H:%M:%S +0000'),
                 'time_iso_8601': timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'),
                 'request': f"{method} {path} HTTP/1.1",
+                'request_details': create_request_details(method, path, '1.1'),
                 'method': method,
                 'path': path,
                 'http_version': '1.1',
@@ -164,7 +195,7 @@ def generate_nginx_logs(num_lines=500000, start_date=datetime(2024, 11, 1)):
                 'http_user_agent': user_agent,
                 'timestamp': timestamp,
                 'tp_date': timestamp.date(),
-                'tp_index': 'dev1.log',
+                'tp_index': 'dev1',
                 'tp_partition': 'dev'
             }
             attack_logs.append(log_entry)
@@ -192,7 +223,7 @@ def generate_nginx_logs(num_lines=500000, start_date=datetime(2024, 11, 1)):
             'tp_source_ip': client_ip,
             'tp_destination_ip': None,
             'tp_source_name': None,
-            'tp_source_location': '/home/jon/tpsrc/tailpipe-plugin-nginx/tests/dev1.log',
+            'tp_source_location': '/home/jon/tpsrc/tailpipe-plugin-nginx/tests/dev1/nginx/access.log',
             'tp_akas': [path],
             'tp_ips': [client_ip],
             'tp_tags': [f"method:{method}"],
@@ -204,6 +235,7 @@ def generate_nginx_logs(num_lines=500000, start_date=datetime(2024, 11, 1)):
             'time_local': timestamp.strftime('%d/%b/%Y:%H:%M:%S +0000'),
             'time_iso_8601': timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'request': f"{method} {path} HTTP/1.1",
+            'request_details': create_request_details(method, path, '1.1'),
             'method': method,
             'path': path,
             'http_version': '1.1',
@@ -213,13 +245,12 @@ def generate_nginx_logs(num_lines=500000, start_date=datetime(2024, 11, 1)):
             'http_user_agent': random.choice(normal_user_agents),
             'timestamp': timestamp,
             'tp_date': timestamp.date(),
-            'tp_index': 'dev1.log',
+            'tp_index': 'dev1',
             'tp_partition': 'dev'
         }
         logs.append(log_entry)
         current_time = timestamp
 
-    
     # Combine and sort all logs
     all_logs = attack_logs + logs
     all_logs.sort(key=lambda x: x['timestamp'])

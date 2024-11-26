@@ -76,56 +76,66 @@ func (c *AccessLogTable) EnrichRow(row *rows.AccessLog, sourceEnrichmentFields *
 	row.TpTimestamp = *row.Timestamp
 	row.TpDate = row.TpTimestamp.Truncate(24 * time.Hour)
 
-	path := filepath.Dir(*row.TpSourceLocation) //  /home/jon/tpsrc/tailpipe-plugin-nginx/tests/dev2/access.log.1
+	// Replace the current index setting code with:
+	path := filepath.Dir(*row.TpSourceLocation)
 	parts := strings.Split(path, string(filepath.Separator))
-	if len(parts) >= 2 {
-		row.TpIndex = parts[len(parts)-1]
-	} else {
-		row.TpIndex = "unknown"
+	// Look for dev* directory
+	for _, part := range parts {
+		if strings.HasPrefix(part, "dev") {
+			row.TpIndex = part
+			break
+		}
 	}
-
-
-// IP handling
-if row.RemoteAddr != nil {
-	row.TpSourceIP = row.RemoteAddr
-	row.TpIps = []string{*row.RemoteAddr}
-}
-
-// Tags enrichment
-tags := make([]string, 0)
-if row.Method != nil {
-	tags = append(tags, "method:"+*row.Method)
-}
-if row.Status != nil {
-	if *row.Status >= 400 {
-		tags = append(tags, "error")
-		if *row.Status >= 500 {
-			tags = append(tags, "server_error")
+	if row.TpIndex == "" {
+		// Fallback if no dev directory found
+		if len(parts) >= 2 {
+			row.TpIndex = parts[len(parts)-1]
 		} else {
-			tags = append(tags, "client_error")
+			row.TpIndex = "unknown"
 		}
 	}
-}
-if len(tags) > 0 {
-	row.TpTags = tags
-}
 
-// Users
-if *row.RemoteUser != "" && *row.RemoteUser != "-" {
-	row.TpUsernames = append(row.TpUsernames, *row.RemoteUser)
-}
+	// IP handling
+	if row.RemoteAddr != nil {
+		row.TpSourceIP = row.RemoteAddr
+		row.TpIps = []string{*row.RemoteAddr}
+	}
 
-// Domain extraction
-if row.Path != nil {
-	// Extract domain from path if it looks like a full URL
-	if strings.HasPrefix(*row.Path, "http://") || strings.HasPrefix(*row.Path, "https://") {
-		if u, err := url.Parse(*row.Path); err == nil && u.Hostname() != "" {
-			row.TpDomains = append(row.TpDomains, u.Hostname())
+	// Tags enrichment
+	tags := make([]string, 0)
+	if row.Method != nil {
+		tags = append(tags, "method:"+*row.Method)
+	}
+	if row.Status != nil {
+		if *row.Status >= 400 {
+			tags = append(tags, "error")
+			if *row.Status >= 500 {
+				tags = append(tags, "server_error")
+			} else {
+				tags = append(tags, "client_error")
+			}
 		}
 	}
-	// Add path to AKAs
-	row.TpAkas = append(row.TpAkas, *row.Path)
-}
+	if len(tags) > 0 {
+		row.TpTags = tags
+	}
+
+	// Users
+	if *row.RemoteUser != "" && *row.RemoteUser != "-" {
+		row.TpUsernames = append(row.TpUsernames, *row.RemoteUser)
+	}
+
+	// Domain extraction
+	if row.Path != nil {
+		// Extract domain from path if it looks like a full URL
+		if strings.HasPrefix(*row.Path, "http://") || strings.HasPrefix(*row.Path, "https://") {
+			if u, err := url.Parse(*row.Path); err == nil && u.Hostname() != "" {
+				row.TpDomains = append(row.TpDomains, u.Hostname())
+			}
+		}
+		// Add path to AKAs
+		row.TpAkas = append(row.TpAkas, *row.Path)
+	}
 
 	return row, nil
 }
