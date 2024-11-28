@@ -31,7 +31,7 @@ type RequestDetails struct {
 	Method       *string           `json:"method,omitempty"`
 	Path         *string           `json:"path,omitempty"`
 	HttpVersion  *string           `json:"http_version,omitempty"`
-	QueryParams  map[string]string `json:"query_params,omitempty"`
+	QueryParams  map[string]string `json:"query_params,omitempty" parquet:"type=JSON"`
 	PathSegments []string          `json:"path_segments,omitempty"`
 	Extension    *string           `json:"extension,omitempty"`
 }
