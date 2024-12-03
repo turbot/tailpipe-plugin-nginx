@@ -68,7 +68,7 @@ func (l *AccessLog) InitialiseFromMap(m map[string]string) error {
 				return err
 			}
 			l.Timestamp = &t
-		case "request":
+		case "request_details":
 			l.Request = &value
 			// Split "GET /login HTTP/1.1" into components
 			parts := strings.SplitN(value, " ", 3)
