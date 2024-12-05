@@ -135,3 +135,39 @@ where
 order by timestamp desc;
 ```
 
+## Schema for nginx_access_log
+
+| Name                | Type                                                                                                                          | Operators   | Description   |
+|:--------------------|:------------------------------------------------------------------------------------------------------------------------------|:------------|:--------------|
+| tp_id               | VARCHAR                                                                                                                       | tbd         | tbd           |
+| tp_source_type      | VARCHAR                                                                                                                       | tbd         | tbd           |
+| tp_ingest_timestamp | TIMESTAMP                                                                                                                     | tbd         | tbd           |
+| tp_timestamp        | TIMESTAMP                                                                                                                     | tbd         | tbd           |
+| tp_source_ip        | VARCHAR                                                                                                                       | tbd         | tbd           |
+| tp_destination_ip   | VARCHAR                                                                                                                       | tbd         | tbd           |
+| tp_source_name      | VARCHAR                                                                                                                       | tbd         | tbd           |
+| tp_source_location  | VARCHAR                                                                                                                       | tbd         | tbd           |
+| tp_akas             | VARCHAR[]                                                                                                                     | tbd         | tbd           |
+| tp_ips              | VARCHAR[]                                                                                                                     | tbd         | tbd           |
+| tp_tags             | VARCHAR[]                                                                                                                     | tbd         | tbd           |
+| tp_domains          | VARCHAR[]                                                                                                                     | tbd         | tbd           |
+| tp_emails           | VARCHAR[]                                                                                                                     | tbd         | tbd           |
+| tp_usernames        | VARCHAR[]                                                                                                                     | tbd         | tbd           |
+| remote_addr         | VARCHAR                                                                                                                       | tbd         | tbd           |
+| remote_user         | VARCHAR                                                                                                                       | tbd         | tbd           |
+| time_local          | VARCHAR                                                                                                                       | tbd         | tbd           |
+| time_iso_8601       | VARCHAR                                                                                                                       | tbd         | tbd           |
+| request             | VARCHAR                                                                                                                       | tbd         | tbd           |
+| request_details     | STRUCT("method" VARCHAR, path VARCHAR, http_version VARCHAR, query_params JSON, path_segments VARCHAR[], "extension" VARCHAR) | tbd         | tbd           |
+| method              | VARCHAR                                                                                                                       | tbd         | tbd           |
+| path                | VARCHAR                                                                                                                       | tbd         | tbd           |
+| http_version        | VARCHAR                                                                                                                       | tbd         | tbd           |
+| status              | BIGINT                                                                                                                        | tbd         | tbd           |
+| body_bytes_sent     | BIGINT                                                                                                                        | tbd         | tbd           |
+| http_referer        | VARCHAR                                                                                                                       | tbd         | tbd           |
+| http_user_agent     | VARCHAR                                                                                                                       | tbd         | tbd           |
+| timestamp           | TIMESTAMP                                                                                                                     | tbd         | tbd           |
+| tp_date             | DATE                                                                                                                          | tbd         | tbd           |
+| tp_index            | VARCHAR                                                                                                                       | tbd         | tbd           |
+| tp_partition        | VARCHAR                                                                                                                       | tbd         | tbd           |
+| tp_table            | VARCHAR                                                                                                                       | tbd         | tbd           |
