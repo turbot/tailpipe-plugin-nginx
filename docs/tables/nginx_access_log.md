@@ -1,32 +1,46 @@
-# Access Log Table
+# Table: Nginx Access Log - Query nginx logs using SQL
 
-> [!NOTE]
-> To collect from multiple servers in a partition called `dev` your `nginx.tpc` would look like this.
->git d
-> ```
-> partition "nginx_access_log" "dev" {
->    source "file_system"  {
->        paths = [
->          "/path/to/logs/dev1",
->          "/path/to/logs/dev2"
->          ]
->        extensions = [".log", ".1", ".gz"]
->    }
->}
->
-> You could add another partition, `prod`, in  similar way.
+nginx is a high-performance, open-source web server and reverse proxy server designed for efficiency, scalability, and reliability. 
 
-> [!NOTE]
-> To run these sample queries against generated test data:
->
-> ```
->  cd ../../tests
->  python generate.py
->  duckdb
->  CREATE VIEW nginx_access_log AS SELECT * FROM read_parquet('nginx_access_log.parquet');
-> ```
+## Table Usage Guide
 
-## logshell exploitation
+### Collection
+
+To collect query logs from a server, your `~/tailpipe/config/nginx.tpc` might look like this.
+
+```hcl
+ partition "nginx_access_log" "dev" {
+    source "file_system"  {
+        paths = [
+          "/path/to/logs/dev1"
+          ]
+        extensions = [".log", ".1", ".gz"]
+    }
+}
+```
+
+Your collection command would be:
+
+```
+tailpipe collect nginx_access_logs.dev
+```
+
+You can then use tailpipe (or DuckDB) to query the table `nginx_access_log`.
+
+To add another server, you could add a path to the `paths` array. To create another multi-server partition, you could add a `prod` partition.
+
+#### Querying generated test data
+
+As an alternative to collection, you can generate test data that includes threat patterns that may not exist in your logs. The [tests](../../tests) folder includes a sample generator. To run it, then query the generated data:
+
+```
+python generate.py
+duckdb
+CREATE VIEW nginx_access_log AS SELECT * FROM read_parquet('nginx_access_log.parquet');
+```
+## Query Examples
+
+### logshell exploitation
 
 ```sql
 select
@@ -43,7 +57,7 @@ having count(*) > 2
 order by attempt_count desc;
 ```
 
-## Path traversal and sensitive file access attempts from known bad IPs
+### Path traversal and sensitive file access attempts from known bad IPs
 
 ```sql
 with suspicious_ips as (
@@ -75,7 +89,7 @@ group by l.tp_source_ip, l.http_user_agent
 order by total_requests desc;
 ```
 
-## SQL injection
+### SQL injection
 
 ```sql
 with sql_injection_patterns as (
