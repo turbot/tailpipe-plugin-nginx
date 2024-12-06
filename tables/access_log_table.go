@@ -36,12 +36,12 @@ func (c *AccessLogTable) Identifier() string {
 	return AccessLogTableIdentifier
 }
 
-func (c *AccessLogTable) SupportedSources(config *AccessLogTableConfig) []*table.SourceMetadata[*rows.AccessLog] {
+func (c *AccessLogTable) GetSourceMetadata(config *AccessLogTableConfig) []*table.SourceMetadata[*rows.AccessLog] {
 	return []*table.SourceMetadata[*rows.AccessLog]{
 		{
 			// any artifact source
 			SourceName: constants.ArtifactSourceIdentifier,
-			MapperFunc: c.initMapper(config),
+			Mapper:     c.getMapper(config),
 			Options: []row_source.RowSourceOption{
 				artifact_source.WithRowPerLine(),
 			},
@@ -49,26 +49,21 @@ func (c *AccessLogTable) SupportedSources(config *AccessLogTableConfig) []*table
 	}
 }
 
-func (c *AccessLogTable) initMapper(config *AccessLogTableConfig) func() table.Mapper[*rows.AccessLog] {
+func (c *AccessLogTable) getMapper(config *AccessLogTableConfig) table.Mapper[*rows.AccessLog] {
 	logFormat := defaultLogFormat
 	if config != nil && config.LogFormat != nil {
 		logFormat = *config.LogFormat
 	}
 
-	f := func() table.Mapper[*rows.AccessLog] {
-		return table.NewDelimitedLineMapper(rows.NewAccessLog, logFormat)
-	}
-	return f
+	return table.NewRowPatternMapper[*rows.AccessLog](logFormat)
 }
 
-func (c *AccessLogTable) EnrichRow(row *rows.AccessLog, sourceEnrichmentFields *enrichment.CommonFields) (*rows.AccessLog, error) {
+func (c *AccessLogTable) EnrichRow(row *rows.AccessLog, _ *AccessLogTableConfig, sourceEnrichmentFields enrichment.SourceEnrichment) (*rows.AccessLog, error) {
 
 	// TODO: #validate ensure we have either `time_local` or `time_iso8601` field as without one of these we can't populate timestamp...
 
 	// Build record and add any source enrichment fields
-	if sourceEnrichmentFields != nil {
-		row.CommonFields = *sourceEnrichmentFields
-	}
+	row.CommonFields = sourceEnrichmentFields.CommonFields
 
 	// Record standardization
 	row.TpID = xid.New().String()
