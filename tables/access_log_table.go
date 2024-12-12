@@ -86,7 +86,7 @@ func (c *AccessLogTable) EnrichRow(row *rows.AccessLog, _ *AccessLogTableConfig,
 		if len(parts) >= 2 {
 			row.TpIndex = parts[len(parts)-1]
 		} else {
-			row.TpIndex = "unknown"
+			row.TpIndex = "default"
 		}
 	}
 
