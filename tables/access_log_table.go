@@ -1,6 +1,7 @@
 package tables
 
 import (
+	"github.com/turbot/tailpipe-plugin-sdk/mappers"
 	"net/url"
 	"path/filepath"
 	"strings"
@@ -55,7 +56,7 @@ func (c *AccessLogTable) getMapper(config *AccessLogTableConfig) table.Mapper[*r
 		logFormat = *config.LogFormat
 	}
 
-	return table.NewRowPatternMapper[*rows.AccessLog](logFormat)
+	return mappers.NewGonxMapper[*rows.AccessLog](logFormat)
 }
 
 func (c *AccessLogTable) EnrichRow(row *rows.AccessLog, _ *AccessLogTableConfig, sourceEnrichmentFields enrichment.SourceEnrichment) (*rows.AccessLog, error) {
