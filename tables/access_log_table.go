@@ -1,19 +1,18 @@
 package tables
 
 import (
-	"github.com/turbot/tailpipe-plugin-sdk/mappers"
 	"net/url"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/rs/xid"
-
 	"github.com/turbot/tailpipe-plugin-nginx/rows"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
 	"github.com/turbot/tailpipe-plugin-sdk/constants"
-	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
+	"github.com/turbot/tailpipe-plugin-sdk/mappers"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
+	"github.com/turbot/tailpipe-plugin-sdk/schema"
 	"github.com/turbot/tailpipe-plugin-sdk/table"
 )
 
@@ -59,7 +58,7 @@ func (c *AccessLogTable) getMapper(config *AccessLogTableConfig) table.Mapper[*r
 	return mappers.NewGonxMapper[*rows.AccessLog](logFormat)
 }
 
-func (c *AccessLogTable) EnrichRow(row *rows.AccessLog, _ *AccessLogTableConfig, sourceEnrichmentFields enrichment.SourceEnrichment) (*rows.AccessLog, error) {
+func (c *AccessLogTable) EnrichRow(row *rows.AccessLog, _ *AccessLogTableConfig, sourceEnrichmentFields schema.SourceEnrichment) (*rows.AccessLog, error) {
 
 	// TODO: #validate ensure we have either `time_local` or `time_iso8601` field as without one of these we can't populate timestamp...
 
