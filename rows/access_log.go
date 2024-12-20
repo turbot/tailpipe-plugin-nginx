@@ -5,11 +5,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
+	"github.com/turbot/tailpipe-plugin-sdk/schema"
 )
 
 type AccessLog struct {
-	enrichment.CommonFields
+	schema.CommonFields
 
 	RemoteAddr     *string         `json:"remote_addr,omitempty"`
 	RemoteUser     *string         `json:"remote_user,omitempty"`
