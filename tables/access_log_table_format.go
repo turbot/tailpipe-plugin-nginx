@@ -2,11 +2,11 @@ package tables
 
 import "fmt"
 
-type AccessLogTableConfig struct {
+type AccessLogTableFormat struct {
 	LogFormat *string `hcl:"log_format"`
 }
 
-func (a *AccessLogTableConfig) Validate() error {
+func (a *AccessLogTableFormat) Validate() error {
 	if a.LogFormat != nil && *a.LogFormat == "" {
 		return fmt.Errorf("log_format cannot be empty")
 	}
@@ -14,6 +14,6 @@ func (a *AccessLogTableConfig) Validate() error {
 	return nil
 }
 
-func (a *AccessLogTableConfig) Identifier() string {
+func (a *AccessLogTableFormat) Identifier() string {
 	return AccessLogTableIdentifier
 }
