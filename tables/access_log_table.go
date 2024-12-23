@@ -25,23 +25,30 @@ func init() {
 	// 1. row struct
 	// 2. table config struct
 	// 3. table implementation
-	table.RegisterTable[*rows.AccessLog, *AccessLogTableConfig, *AccessLogTable]()
+	table.RegisterTableFormat[*rows.AccessLog, *AccessLogTableFormat, *AccessLogTable]()
 }
 
 // AccessLogTable - table for nginx access logs
 type AccessLogTable struct {
+	table.TableWithFormatImpl[*AccessLogTableFormat]
 }
 
 func (c *AccessLogTable) Identifier() string {
 	return AccessLogTableIdentifier
 }
 
-func (c *AccessLogTable) GetSourceMetadata(config *AccessLogTableConfig) []*table.SourceMetadata[*rows.AccessLog] {
+func (c *AccessLogTable) GetSourceMetadata() []*table.SourceMetadata[*rows.AccessLog] {
+	fields := defaultLogFormat
+	// if Format was provided in config, it will have been populated by the factory
+	if c.Format != nil && c.Format.LogFormat != nil {
+		fields = *c.Format.LogFormat
+	}
+
 	return []*table.SourceMetadata[*rows.AccessLog]{
 		{
 			// any artifact source
 			SourceName: constants.ArtifactSourceIdentifier,
-			Mapper:     c.getMapper(config),
+			Mapper:     mappers.NewGonxMapper[*rows.AccessLog](fields),
 			Options: []row_source.RowSourceOption{
 				artifact_source.WithRowPerLine(),
 			},
@@ -49,16 +56,7 @@ func (c *AccessLogTable) GetSourceMetadata(config *AccessLogTableConfig) []*tabl
 	}
 }
 
-func (c *AccessLogTable) getMapper(config *AccessLogTableConfig) table.Mapper[*rows.AccessLog] {
-	logFormat := defaultLogFormat
-	if config != nil && config.LogFormat != nil {
-		logFormat = *config.LogFormat
-	}
-
-	return mappers.NewGonxMapper[*rows.AccessLog](logFormat)
-}
-
-func (c *AccessLogTable) EnrichRow(row *rows.AccessLog, _ *AccessLogTableConfig, sourceEnrichmentFields schema.SourceEnrichment) (*rows.AccessLog, error) {
+func (c *AccessLogTable) EnrichRow(row *rows.AccessLog, sourceEnrichmentFields schema.SourceEnrichment) (*rows.AccessLog, error) {
 
 	// TODO: #validate ensure we have either `time_local` or `time_iso8601` field as without one of these we can't populate timestamp...
 
