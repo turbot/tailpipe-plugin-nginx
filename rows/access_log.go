@@ -14,7 +14,7 @@ type AccessLog struct {
 	RemoteAddr     *string         `json:"remote_addr,omitempty"`
 	RemoteUser     *string         `json:"remote_user,omitempty"`
 	TimeLocal      *string         `json:"time_local,omitempty"`
-	TimeIso8601    *string         `json:"time_iso8601,omitempty"`
+	TimeIso8601    *string         `json:"time_iso_8601,omitempty"`
 	Request        *string         `json:"request,omitempty"`
 	RequestDetails *RequestDetails `json:"request_details,omitempty"`
 	Method         *string         `json:"method,omitempty"`
@@ -61,7 +61,7 @@ func (l *AccessLog) InitialiseFromMap(m map[string]string) error {
 			iso := t.Format(time.RFC3339)
 			l.TimeIso8601 = &iso
 			l.Timestamp = &t
-		case "time_iso8601":
+		case "time_iso_8601":
 			l.TimeIso8601 = &value
 			t, err := time.Parse(time.RFC3339, value)
 			if err != nil {
