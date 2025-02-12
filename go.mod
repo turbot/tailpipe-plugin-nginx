@@ -4,13 +4,13 @@ go 1.23.1
 
 toolchain go1.23.2
 
-replace github.com/turbot/tailpipe-plugin-sdk => ../tailpipe-plugin-sdk
-
-replace github.com/turbot/pipe-fittings => ../pipe-fittings
+replace (
+	github.com/turbot/pipe-fittings/v2 => ../pipe-fittings
+	github.com/turbot/tailpipe-plugin-sdk => ../tailpipe-plugin-sdk
+)
 
 require (
-	github.com/rs/xid v1.5.0
-	github.com/turbot/go-kit v0.10.0-rc.0
+	github.com/turbot/go-kit v1.0.1-rc.0
 	github.com/turbot/tailpipe-plugin-sdk v0.0.0
 )
 
@@ -58,10 +58,10 @@ require (
 	github.com/elastic/go-grok v0.3.1 // indirect
 	github.com/fatih/color v1.17.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
-	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/gertd/go-pluralize v0.2.1 // indirect
-	github.com/go-git/go-git/v5 v5.12.0 // indirect
+	github.com/go-git/go-git/v5 v5.13.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
@@ -80,7 +80,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-getter v1.7.5 // indirect
-	github.com/hashicorp/go-hclog v1.6.2 // indirect
+	github.com/hashicorp/go-hclog v1.6.3 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-plugin v1.6.1 // indirect
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
@@ -128,6 +128,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/rs/xid v1.5.0 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/satyrius/gonx v1.4.0 // indirect
@@ -142,15 +143,13 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.19.0 // indirect
 	github.com/stevenle/topsort v0.2.0 // indirect
-	github.com/stretchr/testify v1.9.0 // indirect
+	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/tklauser/numcpus v0.3.0 // indirect
-	github.com/tkrajina/go-reflector v0.5.6 // indirect
-	github.com/turbot/pipe-fittings v1.4.1 // indirect
-	github.com/turbot/pipes-sdk-go v0.9.1 // indirect
-	github.com/turbot/steampipe-plugin-code v0.7.0 // indirect
-	github.com/turbot/steampipe-plugin-sdk/v5 v5.8.0 // indirect
+	github.com/tkrajina/go-reflector v0.5.8 // indirect
+	github.com/turbot/pipe-fittings/v2 v2.1.0-rc.0 // indirect
+	github.com/turbot/pipes-sdk-go v0.12.0 // indirect
 	github.com/turbot/terraform-components v0.0.0-20231213122222-1f3526cab7a7 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/xlab/treeprint v1.2.0 // indirect

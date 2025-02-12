@@ -2,11 +2,16 @@ package nginx
 
 import (
 	"github.com/turbot/go-kit/helpers"
-	"github.com/turbot/tailpipe-plugin-nginx/config"
+	"github.com/turbot/tailpipe-plugin-nginx/tables"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
-	// reference the table package to ensure that the tables are registered by the init functions
-	_ "github.com/turbot/tailpipe-plugin-nginx/tables"
+	"github.com/turbot/tailpipe-plugin-sdk/table"
 )
+
+const PluginName = "nginx"
+
+func init() {
+	table.RegisterCollector(table.NewCustomCollector[*tables.AccessLogTable]())
+}
 
 type Plugin struct {
 	plugin.PluginImpl
@@ -20,7 +25,7 @@ func NewPlugin() (_ plugin.TailpipePlugin, err error) {
 	}()
 
 	p := &Plugin{
-		PluginImpl: plugin.NewPluginImpl(config.PluginName),
+		PluginImpl: plugin.NewPluginImpl(PluginName),
 	}
 
 	return p, nil
