@@ -9,10 +9,9 @@ import (
 const PluginName = "nginx"
 
 func init() {
-	// Register the table, with type parameters:
-	// 1. row struct type
-	// 2. table implementation type
-	table.RegisterCustomTable[*table.DynamicRow, *access_log.AccessLogTable]()
+	// Register the table, with type parameter:
+	// 1. table type
+	table.RegisterCustomTable[*access_log.AccessLogTable]()
 }
 
 type Plugin struct {

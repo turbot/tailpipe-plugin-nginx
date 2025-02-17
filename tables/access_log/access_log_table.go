@@ -15,7 +15,7 @@ const AccessLogTableIdentifier = "nginx_access_log"
 
 // AccessLogTable - table for nginx access logs
 type AccessLogTable struct {
-	table.CustomTableImpl[*table.DynamicRow]
+	table.CustomTableImpl
 }
 
 func (c *AccessLogTable) Identifier() string {
