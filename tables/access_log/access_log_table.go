@@ -23,8 +23,8 @@ func (c *AccessLogTable) Identifier() string {
 }
 
 func (c *AccessLogTable) GetFormat() parse.Config {
-	return &formats.Grok{
-		Layout: `%{IPORHOST:remote_addr} - %{DATA:remote_user} \[%{HTTPDATE:time_local}\] "%{WORD:method} %{DATA:request} HTTP/%{NUMBER:http_version}" %{NUMBER:status} %{NUMBER:body_bytes_sent} "%{DATA:http_referer}" "%{DATA:http_user_agent}"`,
+	return &formats.Regex{
+		Layout: "^(?<remote_addr>[^ ]*) (?<host>[^ ]*) (?<remote_user>[^ ]*) \\[(?<time_local>[^\\]]*)\\] \"(?<method>\\S+)(?: +(?<path>[^\\\"]*?)(?: +(?<http_version>\\S*))?)?\" (?<status>[^ ]*) (?<body_bytes_sent>[^ ]*)(?: \"(?<http_referer>[^\\\"]*)\" \"(?<http_user_agent>[^\\\"]*)\")",
 	}
 }
 
@@ -45,22 +45,22 @@ func (c *AccessLogTable) GetTableDef() *types.CustomTableDef {
 					ColumnName: "tp_source_ip",
 					SourceName: "remote_addr",
 				},
-				{
-					ColumnName: "tp_ips",
-					SourceName: "remote_addr",
-				},
-				{
-					ColumnName: "tp_usernames",
-					SourceName: "remote_user",
-				},
-				{
-					ColumnName: "tp_domains",
-					SourceName: "path",
-				},
-				{
-					ColumnName: "tp_akas",
-					SourceName: "path",
-				},
+				//{
+				//	ColumnName: "tp_ips",
+				//	SourceName: "remote_addr",
+				//},
+				//{
+				//	ColumnName: "tp_usernames",
+				//	SourceName: "remote_user",
+				//},
+				//{
+				//	ColumnName: "tp_domains",
+				//	SourceName: "path",
+				//},
+				//{
+				//	ColumnName: "tp_akas",
+				//	SourceName: "path",
+				//},
 				{
 					ColumnName:  "remote_addr",
 					Description: "Original source IP from log",
@@ -82,8 +82,8 @@ func (c *AccessLogTable) GetTableDef() *types.CustomTableDef {
 					Type:        "VARCHAR",
 				},
 				{
-					ColumnName:  "request",
-					Description: "Full request string",
+					ColumnName:  "host",
+					Description: "Hostname or virtual host associated with the request, if logged.",
 					Type:        "VARCHAR",
 				},
 				{
@@ -120,11 +120,6 @@ func (c *AccessLogTable) GetTableDef() *types.CustomTableDef {
 					ColumnName:  "http_user_agent",
 					Description: "User agent string",
 					Type:        "VARCHAR",
-				},
-				{
-					ColumnName:  "timestamp",
-					Description: "Parsed timestamp",
-					Type:        "TIMESTAMP",
 				},
 			},
 			// do not automap - only include specific columns
