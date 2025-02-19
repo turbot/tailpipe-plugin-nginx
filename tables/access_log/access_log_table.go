@@ -42,8 +42,8 @@ func (c *AccessLogTable) GetTableDef() *types.CustomTableDef {
 					SourceName: "time_local",
 				},
 				{
-					SourceName: "remote_addr",
 					ColumnName: "tp_source_ip",
+					SourceName: "remote_addr",
 				},
 				{
 					ColumnName: "tp_ips",
@@ -64,54 +64,67 @@ func (c *AccessLogTable) GetTableDef() *types.CustomTableDef {
 				{
 					ColumnName:  "remote_addr",
 					Description: "Original source IP from log",
+					Type:        "VARCHAR",
 				},
 				{
 					ColumnName:  "remote_user",
 					Description: "User authenticated in request",
+					Type:        "VARCHAR",
 				},
 				{
 					ColumnName:  "time_local",
 					Description: "Timestamp in local format",
+					Type:        "VARCHAR",
 				},
 				{
 					ColumnName:  "time_iso_8601",
 					Description: "Timestamp in ISO8601 format",
+					Type:        "VARCHAR",
 				},
 				{
 					ColumnName:  "request",
 					Description: "Full request string",
+					Type:        "VARCHAR",
 				},
 				{
 					ColumnName:  "method",
 					Description: "HTTP method (GET, POST, etc.)",
+					Type:        "VARCHAR",
 				},
 				{
 					ColumnName:  "path",
 					Description: "URL path from request",
+					Type:        "VARCHAR",
 				},
 				{
 					ColumnName:  "http_version",
 					Description: "HTTP version",
+					Type:        "VARCHAR",
 				},
 				{
 					ColumnName:  "status",
 					Description: "HTTP response status code",
+					Type:        "INTEGER",
 				},
 				{
 					ColumnName:  "body_bytes_sent",
 					Description: "Size of response in bytes",
+					Type:        "INTEGER",
 				},
 				{
 					ColumnName:  "http_referer",
 					Description: "Referer URL",
+					Type:        "VARCHAR",
 				},
 				{
 					ColumnName:  "http_user_agent",
 					Description: "User agent string",
+					Type:        "VARCHAR",
 				},
 				{
 					ColumnName:  "timestamp",
 					Description: "Parsed timestamp",
+					Type:        "TIMESTAMP",
 				},
 			},
 			// do not automap - only include specific columns
