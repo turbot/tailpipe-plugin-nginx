@@ -70,6 +70,7 @@ func (c *AccessLogTable) GetTableDef() *types.CustomTableDef {
 					ColumnName:  "remote_user",
 					Description: "User authenticated in request",
 					Type:        "VARCHAR",
+					NullValue:   "-", // nginx uses "-" for empty values
 				},
 				{
 					ColumnName:  "time_local",
@@ -85,6 +86,7 @@ func (c *AccessLogTable) GetTableDef() *types.CustomTableDef {
 					ColumnName:  "host",
 					Description: "Hostname or virtual host associated with the request, if logged.",
 					Type:        "VARCHAR",
+					NullValue:   "-", // nginx uses "-" for empty values
 				},
 				{
 					ColumnName:  "method",
@@ -110,11 +112,13 @@ func (c *AccessLogTable) GetTableDef() *types.CustomTableDef {
 					ColumnName:  "body_bytes_sent",
 					Description: "Size of response in bytes",
 					Type:        "INTEGER",
+					NullValue:   "-", // nginx uses "-" for empty values
 				},
 				{
 					ColumnName:  "http_referer",
 					Description: "Referer URL",
 					Type:        "VARCHAR",
+					NullValue:   "-", // nginx uses "-" for empty values
 				},
 				{
 					ColumnName:  "http_user_agent",
