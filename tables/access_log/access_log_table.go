@@ -24,7 +24,7 @@ func (c *AccessLogTable) Identifier() string {
 
 func (c *AccessLogTable) GetFormat() parse.Config {
 	return &formats.Regex{
-		Layout: "^(?<remote_addr>[^ ]*) (?<host>[^ ]*) (?<remote_user>[^ ]*) \\[(?<time_local>[^\\]]*)\\] \"(?<method>\\S+)(?: +(?<path>[^\\\"]*?)(?: +(?<http_version>\\S*))?)?\" (?<status>[^ ]*) (?<body_bytes_sent>[^ ]*)(?: \"(?<http_referer>[^\\\"]*)\" \"(?<http_user_agent>[^\\\"]*)\")",
+		Layout: `^(?<remote_addr>[^ ]*) (?<host>[^ ]*) (?<remote_user>[^ ]*) \[(?<time_local>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^"]*?)(?: +(?<http_version>\S*))?)?" (?<status>[^ ]*) (?<body_bytes_sent>[^ ]*)(?: "(?<http_referer>[^"]*)" "(?<http_user_agent>[^"]*)")`,
 	}
 }
 
@@ -122,8 +122,6 @@ func (c *AccessLogTable) GetTableDef() *types.CustomTableDef {
 					Type:        "VARCHAR",
 				},
 			},
-			// do not automap - only include specific columns
-			AutoMapSourceFields: false,
 		},
 	}
 }
