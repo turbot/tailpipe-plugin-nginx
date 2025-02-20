@@ -38,10 +38,6 @@ func (c *AccessLogTable) GetTableDef() *types.CustomTableDef {
 					SourceName: "time_local",
 				},
 				{
-					ColumnName: "tp_date",
-					SourceName: "time_local",
-				},
-				{
 					ColumnName: "tp_source_ip",
 					SourceName: "remote_addr",
 				},
