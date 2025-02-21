@@ -2,6 +2,8 @@ module github.com/turbot/tailpipe-plugin-nginx
 
 go 1.24
 
+toolchain go1.24.0
+
 replace (
 	github.com/turbot/pipe-fittings/v2 => ../pipe-fittings
 	github.com/turbot/tailpipe-plugin-sdk => ../tailpipe-plugin-sdk
@@ -143,7 +145,6 @@ require (
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/tklauser/numcpus v0.3.0 // indirect
 	github.com/tkrajina/go-reflector v0.5.8 // indirect
-	github.com/turbot/go-kit v1.0.1-rc.0 // indirect
 	github.com/turbot/pipe-fittings/v2 v2.1.0-rc.0 // indirect
 	github.com/turbot/pipes-sdk-go v0.12.0 // indirect
 	github.com/turbot/terraform-components v0.0.0-20231213122222-1f3526cab7a7 // indirect
