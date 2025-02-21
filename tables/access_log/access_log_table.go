@@ -27,8 +27,9 @@ func (c *AccessLogTable) GetFormat() parse.Config {
 	}
 }
 
-func (c *AccessLogTable) GetSchema() *schema.TableSchema {
+func (c *AccessLogTable) GetTableDefinition() *schema.TableSchema {
 	return &schema.TableSchema{
+		Name: AccessLogTableIdentifier,
 		Columns: []*schema.ColumnSchema{
 			{
 				ColumnName: "tp_timestamp",
@@ -42,22 +43,22 @@ func (c *AccessLogTable) GetSchema() *schema.TableSchema {
 				ColumnName: "tp_source_ip",
 				SourceName: "remote_addr",
 			},
-			//{
-			//	ColumnName: "tp_ips",
-			//	SourceName: "remote_addr",
-			//},
+			{
+				ColumnName: "tp_ips",
+				SourceName: "remote_addr",
+			},
 			{
 				ColumnName: "tp_usernames",
 				SourceName: "remote_user",
 			},
-			//{
-			//	ColumnName: "tp_domains",
-			//	SourceName: "path",
-			//},
-			//{
-			//	ColumnName: "tp_akas",
-			//	SourceName: "path",
-			//},
+			{
+				ColumnName: "tp_domains",
+				SourceName: "path",
+			},
+			{
+				ColumnName: "tp_akas",
+				SourceName: "path",
+			},
 			{
 				ColumnName:  "remote_addr",
 				Description: "Original source IP from log",
