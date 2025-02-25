@@ -11,7 +11,7 @@ const PluginName = "nginx"
 func init() {
 	// Register the table, with type parameter:
 	// 1. table type
-	table.RegisterPredefinedCustomTable[*access_log.AccessLogTable]()
+	table.RegisterCustomTable[*access_log.AccessLogTable]()
 }
 
 type Plugin struct {

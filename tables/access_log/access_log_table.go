@@ -7,10 +7,10 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
 	"github.com/turbot/tailpipe-plugin-sdk/constants"
 	"github.com/turbot/tailpipe-plugin-sdk/formats"
-	"github.com/turbot/tailpipe-plugin-sdk/parse"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 	"github.com/turbot/tailpipe-plugin-sdk/schema"
 	"github.com/turbot/tailpipe-plugin-sdk/table"
+	"github.com/turbot/tailpipe-plugin-sdk/types"
 )
 
 const AccessLogTableIdentifier = "nginx_access_log"
@@ -24,9 +24,19 @@ func (c *AccessLogTable) Identifier() string {
 	return AccessLogTableIdentifier
 }
 
-func (c *AccessLogTable) GetFormat() parse.Config {
-	return &formats.Regex{
-		Layout: `^(?<remote_addr>[^ ]*) (?<host>[^ ]*) (?<remote_user>[^ ]*) \[(?<time_local>[^\]]*)\] "(?<request_method>\S+)(?: +(?<request_uri>[^"]*?)(?: +(?<server_protocol>\S*))?)?" (?<status>[^ ]*) (?<body_bytes_sent>[^ ]*)(?: "(?<http_referer>[^"]*)" "(?<http_user_agent>[^"]*)")`,
+// GetSupportedFormats returns a map of the formats that this table supports, including the default format
+func (c *AccessLogTable) GetSupportedFormats() *formats.SupportedFormats {
+	return &formats.SupportedFormats{
+		Formats: map[string]func() formats.Format{
+			AccessLogTableIdentifier: NewAccessLogTableFormat,
+		},
+		FormatInstances: map[string]formats.Format{
+			"default": &AccessLogTableFormat{
+				Name:   "default",
+				Layout: "default - TODO",
+			},
+		},
+		DefaultFormat: "default",
 	}
 }
 
@@ -240,7 +250,7 @@ func (c *AccessLogTable) GetTableDefinition() *schema.TableSchema {
 	}
 }
 
-func (c *AccessLogTable) GetSourceMetadata() ([]*table.SourceMetadata[*table.DynamicRow], error) {
+func (c *AccessLogTable) GetSourceMetadata() ([]*table.SourceMetadata[*types.DynamicRow], error) {
 	// ask our CustomTableImpl for the mapper
 	mapper, err := c.GetMapper()
 	if err != nil {
@@ -248,7 +258,7 @@ func (c *AccessLogTable) GetSourceMetadata() ([]*table.SourceMetadata[*table.Dyn
 	}
 
 	// which source do we support?
-	return []*table.SourceMetadata[*table.DynamicRow]{
+	return []*table.SourceMetadata[*types.DynamicRow]{
 		{
 			// any artifact source
 			SourceName: constants.ArtifactSourceIdentifier,
@@ -260,7 +270,7 @@ func (c *AccessLogTable) GetSourceMetadata() ([]*table.SourceMetadata[*table.Dyn
 	}, nil
 }
 
-func (c *AccessLogTable) EnrichRow(row *table.DynamicRow, sourceEnrichmentFields schema.SourceEnrichment) (*table.DynamicRow, error) {
+func (c *AccessLogTable) EnrichRow(row *types.DynamicRow, sourceEnrichmentFields schema.SourceEnrichment) (*types.DynamicRow, error) {
 	nilChar := c.GetTableDefinition().NullValue
 
 	// tp_timestamp / tp_date can be parsed from time_local OR time_iso8601
