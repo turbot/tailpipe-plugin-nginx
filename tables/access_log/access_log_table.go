@@ -27,15 +27,19 @@ func (c *AccessLogTable) Identifier() string {
 // GetSupportedFormats returns a map of the formats that this table supports, including the default format
 func (c *AccessLogTable) GetSupportedFormats() *formats.SupportedFormats {
 	return &formats.SupportedFormats{
+		// map of constructors of ALL supported formats (built in and custom)
 		Formats: map[string]func() formats.Format{
-			AccessLogTableIdentifier: NewAccessLogTableFormat,
+			AccessLogTableIdentifier:    NewAccessLogTableFormat,
+			constants.SourceFormatRegex: formats.NewRegex,
 		},
-		FormatInstances: map[string]formats.Format{
-			"default": &AccessLogTableFormat{
+		// map of instances of supported formats - these may be referenced in HCL config
+		FormatInstances: []formats.Format{
+			&AccessLogTableFormat{
 				Name:   "default",
 				Layout: "default - TODO",
 			},
 		},
+		// which format is the default for this table
 		DefaultFormat: "default",
 	}
 }

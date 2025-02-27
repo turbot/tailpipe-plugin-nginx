@@ -1,7 +1,6 @@
 package access_log
 
 import (
-	"github.com/turbot/tailpipe-plugin-sdk/constants"
 	"github.com/turbot/tailpipe-plugin-sdk/formats"
 	"github.com/turbot/tailpipe-plugin-sdk/mappers"
 	"github.com/turbot/tailpipe-plugin-sdk/types"
@@ -25,10 +24,12 @@ func (c *AccessLogTableFormat) Validate() error {
 }
 
 func (c *AccessLogTableFormat) Identifier() string {
-	return constants.SourceFormatRegex
+	// format name is same as table name
+	return AccessLogTableIdentifier
 }
 
 func (c *AccessLogTableFormat) GetMapper() (mappers.Mapper[*types.DynamicRow], error) {
+	// convert the layout to a regex
 	regex, err := c.getRegex()
 	if err != nil {
 		return nil, err
@@ -36,6 +37,7 @@ func (c *AccessLogTableFormat) GetMapper() (mappers.Mapper[*types.DynamicRow], e
 	return mappers.NewRegexMapper[*types.DynamicRow](regex)
 }
 
+// getRegex converts the layout to a regex
 func (c *AccessLogTableFormat) getRegex() (string, error) {
 	// TODO wire in grazas code
 	return `TODO`, nil
