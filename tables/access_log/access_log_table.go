@@ -2,7 +2,6 @@ package access_log
 
 import (
 	"errors"
-	"strings"
 
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
 	"github.com/turbot/tailpipe-plugin-sdk/constants"
@@ -44,12 +43,12 @@ func (c *AccessLogTable) GetTableDefinition() *schema.TableSchema {
 		Name: AccessLogTableIdentifier,
 		Columns: []*schema.ColumnSchema{
 			{
-				ColumnName: "tp_source_ip",
-				SourceName: "remote_addr",
+				ColumnName: "tp_timestamp",
+				SourceName: "time_local",
 			},
 			{
-				ColumnName: "tp_usernames",
-				SourceName: "remote_user",
+				ColumnName: "tp_source_ip",
+				SourceName: "remote_addr",
 			},
 			// default format fields
 			{
@@ -274,9 +273,9 @@ func (c *AccessLogTable) EnrichRow(row *types.DynamicRow, sourceEnrichmentFields
 
 	// tp_timestamp / tp_date can be parsed from time_local OR time_iso8601
 	// Do this before row.Enrich so that it is set and can be parsed/formatted correctly along with tp_date (save duplicating code)
-	if ts, ok := row.Columns["time_local"]; ok {
+	if ts, ok := row.Columns["time_local"]; ok && ts != nilChar {
 		row.Columns["tp_timestamp"] = ts
-	} else if ts, ok = row.Columns["time_iso8601"]; ok {
+	} else if ts, ok = row.Columns["time_iso8601"]; ok && ts != nilChar {
 		row.Columns["tp_timestamp"] = ts
 	} else {
 		return nil, errors.New("no timestamp found in row")
@@ -291,32 +290,41 @@ func (c *AccessLogTable) EnrichRow(row *types.DynamicRow, sourceEnrichmentFields
 	// Enrich Array Based TP Fields as we don't have a mechanism to do this via direct mapping
 
 	// tp_ips
-	var ips []string
-	if remoteAddr, ok := row.Columns["remote_addr"]; ok {
-		ips = append(ips, remoteAddr)
-	}
-	if serverAddr, ok := row.Columns["server_addr"]; ok {
-		ips = append(ips, serverAddr)
-	}
-	if upstreamAddr, ok := row.Columns["upstream_addr"]; ok {
-		ips = append(ips, upstreamAddr)
-	}
-	if len(ips) > 0 {
-		row.Columns["tp_ips"] = strings.Join(ips, ",")
-	}
-
-	// tp_domains
-	var domains []string
-	if host, ok := row.Columns["host"]; ok && host != nilChar {
-		domains = append(domains, host)
-	}
-	if httpHost, ok := row.Columns["http_host"]; ok && httpHost != nilChar {
-		domains = append(domains, httpHost)
-	}
-	if len(domains) > 0 {
-		row.Columns["tp_domains"] = strings.Join(domains, ",")
-		row.Columns["tp_akas"] = strings.Join(domains, ",") // TODO: What should be the value of tp_akas?
-	}
+	//var ips []string
+	//if remoteAddr, ok := row.Columns["remote_addr"]; ok {
+	//	ips = append(ips, remoteAddr)
+	//}
+	//if serverAddr, ok := row.Columns["server_addr"]; ok {
+	//	ips = append(ips, serverAddr)
+	//}
+	//if upstreamAddr, ok := row.Columns["upstream_addr"]; ok {
+	//	ips = append(ips, upstreamAddr)
+	//}
+	//if len(ips) > 0 {
+	//	row.Columns["tp_ips"] = strings.Join(ips, ",")
+	//}
+	//
+	//// tp_domains
+	//var domains []string
+	//if host, ok := row.Columns["host"]; ok && host != nilChar {
+	//	domains = append(domains, host)
+	//}
+	//if httpHost, ok := row.Columns["http_host"]; ok && httpHost != nilChar {
+	//	domains = append(domains, httpHost)
+	//}
+	//if len(domains) > 0 {
+	//	row.Columns["tp_domains"] = strings.Join(domains, ",")
+	//	row.Columns["tp_akas"] = strings.Join(domains, ",") // TODO: What should be the value of tp_akas?
+	//}
+	//
+	//// tp_usernames
+	//var usernames []string
+	//if remoteUser, ok := row.Columns["remote_user"]; ok && remoteUser != nilChar {
+	//	usernames = append(usernames, remoteUser)
+	//}
+	//if len(usernames) > 0 {
+	//	row.Columns["tp_usernames"] = strings.Join(usernames, ",")
+	//}
 
 	return row, nil
 }
@@ -324,6 +332,6 @@ func (c *AccessLogTable) EnrichRow(row *types.DynamicRow, sourceEnrichmentFields
 func (c *AccessLogTable) defaultFormat() *AccessLogTableFormat {
 	return &AccessLogTableFormat{
 		Name:   "default",
-		Layout: "default - TODO",
+		Layout: `$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"`,
 	}
 }
