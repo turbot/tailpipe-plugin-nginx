@@ -23,9 +23,16 @@ func (c *AccessLogTableFormat) Validate() error {
 	return nil
 }
 
+// Identifier returns the format TYPE
 func (c *AccessLogTableFormat) Identifier() string {
 	// format name is same as table name
 	return AccessLogTableIdentifier
+}
+
+// GetName returns the format instance name
+func (c *AccessLogTableFormat) GetName() string {
+	// format name is same as table name
+	return c.Name
 }
 
 func (c *AccessLogTableFormat) GetMapper() (mappers.Mapper[*types.DynamicRow], error) {

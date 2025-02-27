@@ -32,15 +32,10 @@ func (c *AccessLogTable) GetSupportedFormats() *formats.SupportedFormats {
 			AccessLogTableIdentifier:    NewAccessLogTableFormat,
 			constants.SourceFormatRegex: formats.NewRegex,
 		},
-		// map of instances of supported formats - these may be referenced in HCL config
-		FormatInstances: []formats.Format{
-			&AccessLogTableFormat{
-				Name:   "default",
-				Layout: "default - TODO",
-			},
-		},
 		// which format is the default for this table
-		DefaultFormat: "default",
+		DefaultFormat: c.defaultFormat(),
+		// map of instances of supported formats - these may be referenced in HCL config
+		//FormatInstances: []formats.Format{},
 	}
 }
 
@@ -324,4 +319,11 @@ func (c *AccessLogTable) EnrichRow(row *types.DynamicRow, sourceEnrichmentFields
 	}
 
 	return row, nil
+}
+
+func (c *AccessLogTable) defaultFormat() *AccessLogTableFormat {
+	return &AccessLogTableFormat{
+		Name:   "default",
+		Layout: "default - TODO",
+	}
 }
