@@ -52,7 +52,7 @@ func (c *AccessLogTableFormat) GetMapper() (mappers.Mapper[*types.DynamicRow], e
 // getRegex converts the layout to a regex
 func (c *AccessLogTableFormat) getRegex() (string, error) {
 	format := c.Layout
-	var unknownTokens []string
+	var unsupportedTokens []string
 
 	// escape brackets
 	format = strings.ReplaceAll(format, "[", `\[`)
@@ -60,20 +60,30 @@ func (c *AccessLogTableFormat) getRegex() (string, error) {
 	format = strings.ReplaceAll(format, "(", `\(`)
 	format = strings.ReplaceAll(format, ")", `\)`)
 
-	// Replace tokens with regex patterns
+	// regex to grab tokens
 	re := regexp.MustCompile(`\$\w+`)
+
+	// check for concatenated tokens (e.g. $body_bytes$status)
+	tokens := re.FindAllStringIndex(format, -1)
+	for i := 1; i < len(tokens); i++ {
+		if tokens[i-1][1] == tokens[i][0] {
+			return "", errors.New(fmt.Sprintf("concatenated tokens detected in format '%s', this is currently unsupported in this format, if this is a requirement a Regex format can be used.", format))
+		}
+	}
+
+	// replace tokens with regex patterns
 	format = re.ReplaceAllStringFunc(format, func(match string) string {
 		if pattern, exists := getRegexForSegment(match); exists {
 			return pattern
 		} else {
-			unknownTokens = append(unknownTokens, match)
+			unsupportedTokens = append(unsupportedTokens, match)
 		}
 
 		return match
 	})
 
-	if len(unknownTokens) > 0 {
-		return "", errors.New("unknown tokens in format: " + strings.Join(unknownTokens, ", "))
+	if len(unsupportedTokens) > 0 {
+		return "", errors.New("the following tokens are not currently supported in this format: " + strings.Join(unsupportedTokens, ", "))
 	}
 
 	if len(format) > 0 {
