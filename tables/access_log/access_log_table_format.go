@@ -51,23 +51,18 @@ func (c *AccessLogTableFormat) GetMapper() (mappers.Mapper[*types.DynamicRow], e
 
 // getRegex converts the layout to a regex
 func (c *AccessLogTableFormat) getRegex() (string, error) {
-	format := c.Layout
+	format := regexp.QuoteMeta(c.Layout)
 	var unsupportedTokens []string
 
-	// escape brackets
-	format = strings.ReplaceAll(format, "[", `\[`)
-	format = strings.ReplaceAll(format, "]", `\]`)
-	format = strings.ReplaceAll(format, "(", `\(`)
-	format = strings.ReplaceAll(format, ")", `\)`)
-
 	// regex to grab tokens
-	re := regexp.MustCompile(`\$\w+`)
+	re := regexp.MustCompile(`\\\$\w+`)
 
 	// check for concatenated tokens (e.g. $body_bytes$status)
 	tokens := re.FindAllStringIndex(format, -1)
 	for i := 1; i < len(tokens); i++ {
-		if tokens[i-1][1] == tokens[i][0] {
-			return "", errors.New(fmt.Sprintf("concatenated tokens detected in format '%s', this is currently unsupported in this format, if this is a requirement a Regex format can be used.", format))
+		// With QuoteMeta, tokens will be 2 characters further apart due to the backslash escape
+		if tokens[i][0]-tokens[i-1][1] < 1 {
+			return "", errors.New(fmt.Sprintf("concatenated tokens detected in format '%s', this is currently unsupported in this format, if this is a requirement a Regex format can be used.", c.Layout))
 		}
 	}
 
@@ -76,7 +71,7 @@ func (c *AccessLogTableFormat) getRegex() (string, error) {
 		if pattern, exists := getRegexForSegment(match); exists {
 			return pattern
 		} else {
-			unsupportedTokens = append(unsupportedTokens, match)
+			unsupportedTokens = append(unsupportedTokens, strings.TrimPrefix(match, `\`))
 		}
 
 		return match
@@ -104,61 +99,61 @@ func getRegexForSegment(segment string) (string, bool) {
 		return override, true
 	}
 
-	return fmt.Sprintf(defaultRegexFormat, strings.TrimPrefix(segment, "$")), true
+	return fmt.Sprintf(defaultRegexFormat, strings.TrimPrefix(segment, `\$`)), true
 }
 
 func getValidNginxTokenMap() map[string]struct{} {
 	return map[string]struct{}{
-		`$remote_addr`:            {},
-		`$host`:                   {},
-		`$remote_user`:            {},
-		`$time_local`:             {},
-		`$request`:                {},
-		`$request_method`:         {},
-		`$request_uri`:            {},
-		`$server_protocol`:        {},
-		`$status`:                 {},
-		`$body_bytes_sent`:        {},
-		`$http_referer`:           {},
-		`$http_user_agent`:        {},
-		`$scheme`:                 {},
-		`$http_host`:              {},
-		`$http_cookie`:            {},
-		`$content_length`:         {},
-		`$content_type`:           {},
-		`$request_length`:         {},
-		`$server_name`:            {},
-		`$server_addr`:            {},
-		`$server_port`:            {},
-		`$connection`:             {},
-		`$connection_requests`:    {},
-		`$msec`:                   {},
-		`$time_iso8601`:           {},
-		`$bytes_sent`:             {},
-		`$request_time`:           {},
-		`$pipe`:                   {},
-		`$upstream_addr`:          {},
-		`$upstream_status`:        {},
-		`$upstream_response_time`: {},
-		`$upstream_connect_time`:  {},
-		`$upstream_header_time`:   {},
-		`$ssl_protocol`:           {},
-		`$ssl_cipher`:             {},
-		`$ssl_session_id`:         {},
-		`$ssl_client_cert`:        {},
-		`$ssl_session_reused`:     {},
-		`$gzip_ratio`:             {},
+		`\$remote_addr`:            {},
+		`\$host`:                   {},
+		`\$remote_user`:            {},
+		`\$time_local`:             {},
+		`\$request`:                {},
+		`\$request_method`:         {},
+		`\$request_uri`:            {},
+		`\$server_protocol`:        {},
+		`\$status`:                 {},
+		`\$body_bytes_sent`:        {},
+		`\$http_referer`:           {},
+		`\$http_user_agent`:        {},
+		`\$scheme`:                 {},
+		`\$http_host`:              {},
+		`\$http_cookie`:            {},
+		`\$content_length`:         {},
+		`\$content_type`:           {},
+		`\$request_length`:         {},
+		`\$server_name`:            {},
+		`\$server_addr`:            {},
+		`\$server_port`:            {},
+		`\$connection`:             {},
+		`\$connection_requests`:    {},
+		`\$msec`:                   {},
+		`\$time_iso8601`:           {},
+		`\$bytes_sent`:             {},
+		`\$request_time`:           {},
+		`\$pipe`:                   {},
+		`\$upstream_addr`:          {},
+		`\$upstream_status`:        {},
+		`\$upstream_response_time`: {},
+		`\$upstream_connect_time`:  {},
+		`\$upstream_header_time`:   {},
+		`\$ssl_protocol`:           {},
+		`\$ssl_cipher`:             {},
+		`\$ssl_session_id`:         {},
+		`\$ssl_client_cert`:        {},
+		`\$ssl_session_reused`:     {},
+		`\$gzip_ratio`:             {},
 	}
 }
 
 func getRegexOverrides() map[string]string {
 	return map[string]string{
-		`$time_local`:      `(?P<time_local>[^\]]*)`,
-		`$request`:         `(?P<request_method>\S+)(?: +(?P<request_uri>[^ ]+))?(?: +(?P<server_protocol>\S+))?`,
-		`$request_method`:  `(?P<request_method>\S+)`,
-		`$request_uri`:     `(?P<request_uri>.*?)`,
-		`$server_protocol`: `(?P<server_protocol>\S+)`,
-		`$http_referer`:    `(?P<http_referer>.*?)`,
-		`$http_user_agent`: `(?P<http_user_agent>.*?)`,
+		`\$time_local`:      `(?P<time_local>[^\]]*)`,
+		`\$request`:         `(?P<request_method>\S+)(?: +(?P<request_uri>[^ ]+))?(?: +(?P<server_protocol>\S+))?`,
+		`\$request_method`:  `(?P<request_method>\S+)`,
+		`\$request_uri`:     `(?P<request_uri>.*?)`,
+		`\$server_protocol`: `(?P<server_protocol>\S+)`,
+		`\$http_referer`:    `(?P<http_referer>.*?)`,
+		`\$http_user_agent`: `(?P<http_user_agent>.*?)`,
 	}
 }
