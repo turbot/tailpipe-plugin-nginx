@@ -248,7 +248,7 @@ func (c *AccessLogTable) GetTableDefinition() *schema.TableSchema {
 
 func (c *AccessLogTable) GetSourceMetadata() ([]*table.SourceMetadata[*types.DynamicRow], error) {
 	// ask our CustomTableImpl for the mapper
-	mapper, err := c.GetMapper()
+	mapper, err := c.Format.GetMapper()
 	if err != nil {
 		return nil, err
 	}
