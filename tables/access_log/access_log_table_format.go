@@ -11,14 +11,16 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/types"
 )
 
+
 type AccessLogTableFormat struct {
 	// the name of this format instance
 	Name string `hcl:"name,label"`
+	// Description of the format
+	Description string `hcl:"description,optional"`
 	// the layout of the log line
-	// NOTE that as will contain grok patterns, this property is included in constants.GrokConfigProperties
-	// meaning and '{' will be auto-escaped in the hcl
 	Layout string `hcl:"layout"`
 }
+
 
 func NewAccessLogTableFormat() formats.Format {
 	return &AccessLogTableFormat{}
@@ -40,9 +42,19 @@ func (c *AccessLogTableFormat) GetName() string {
 	return c.Name
 }
 
+func (c *AccessLogTableFormat) GetDescription() string {
+	return c.Description
+}
+
+// GetFormatString returns the format as a string which can be included in the introspection response
+// in our case, we just return the layout
+func (c *AccessLogTableFormat) GetFormatString() string {
+	return c.Layout
+}
+
 func (c *AccessLogTableFormat) GetMapper() (mappers.Mapper[*types.DynamicRow], error) {
 	// convert the layout to a regex
-	regex, err := c.getRegex()
+	regex, err := c.GetRegex()
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +62,7 @@ func (c *AccessLogTableFormat) GetMapper() (mappers.Mapper[*types.DynamicRow], e
 }
 
 // getRegex converts the layout to a regex
-func (c *AccessLogTableFormat) getRegex() (string, error) {
+func (c *AccessLogTableFormat) GetRegex() (string, error) {
 	format := regexp.QuoteMeta(c.Layout)
 	var unsupportedTokens []string
 

@@ -34,7 +34,9 @@ func (c *AccessLogTable) GetSupportedFormats() *formats.SupportedFormats {
 		// which format is the default for this table
 		DefaultFormat: c.defaultFormat(),
 		// map of instances of supported formats - these may be referenced in HCL config
-		//FormatInstances: []formats.Format{},
+		FormatInstances: []formats.Format{
+			c.defaultFormat(),
+		},
 	}
 }
 
