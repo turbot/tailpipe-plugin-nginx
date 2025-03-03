@@ -46,12 +46,6 @@ func (c *AccessLogTableFormat) GetDescription() string {
 	return c.Description
 }
 
-// GetFormatString returns the format as a string which can be included in the introspection response
-// in our case, we just return the layout
-func (c *AccessLogTableFormat) GetFormatString() string {
-	return c.Layout
-}
-
 func (c *AccessLogTableFormat) GetMapper() (mappers.Mapper[*types.DynamicRow], error) {
 	// convert the layout to a regex
 	regex, err := c.GetRegex()
@@ -61,7 +55,6 @@ func (c *AccessLogTableFormat) GetMapper() (mappers.Mapper[*types.DynamicRow], e
 	return mappers.NewRegexMapper[*types.DynamicRow](regex)
 }
 
-// getRegex converts the layout to a regex
 func (c *AccessLogTableFormat) GetRegex() (string, error) {
 	format := regexp.QuoteMeta(c.Layout)
 	var unsupportedTokens []string
@@ -98,6 +91,12 @@ func (c *AccessLogTableFormat) GetRegex() (string, error) {
 	}
 
 	return format, nil
+}
+
+func (c *AccessLogTableFormat) GetProperties() map[string]string {
+	return map[string]string{
+		"layout": c.Layout,
+	}
 }
 
 func getRegexForSegment(segment string) (string, bool) {
