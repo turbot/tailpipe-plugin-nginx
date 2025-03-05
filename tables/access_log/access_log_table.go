@@ -32,11 +32,7 @@ func (c *AccessLogTable) GetSupportedFormats() *formats.SupportedFormats {
 			constants.SourceFormatRegex: formats.NewRegex,
 		},
 		// which format is the default for this table
-		DefaultFormat: c.defaultFormat(),
-		// map of instances of supported formats - these may be referenced in HCL config
-		FormatInstances: []formats.Format{
-			c.defaultFormat(),
-		},
+		DefaultFormat: defaultAccessLogTableFormat,
 	}
 }
 
@@ -329,11 +325,4 @@ func (c *AccessLogTable) EnrichRow(row *types.DynamicRow, sourceEnrichmentFields
 	//}
 
 	return row, nil
-}
-
-func (c *AccessLogTable) defaultFormat() *AccessLogTableFormat {
-	return &AccessLogTableFormat{
-		Name:   "default",
-		Layout: `$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"`,
-	}
 }

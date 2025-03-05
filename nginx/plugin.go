@@ -12,6 +12,9 @@ func init() {
 	// Register the table, with type parameter:
 	// 1. table type
 	table.RegisterCustomTable[*access_log.AccessLogTable]()
+
+	// register formats
+	table.RegisterFormat(access_log.AccessLogTableFormatPresets...)
 }
 
 type Plugin struct {

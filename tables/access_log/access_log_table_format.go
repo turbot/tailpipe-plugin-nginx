@@ -11,7 +11,6 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/types"
 )
 
-
 type AccessLogTableFormat struct {
 	// the name of this format instance
 	Name string `hcl:"name,label"`
@@ -20,7 +19,6 @@ type AccessLogTableFormat struct {
 	// the layout of the log line
 	Layout string `hcl:"layout"`
 }
-
 
 func NewAccessLogTableFormat() formats.Format {
 	return &AccessLogTableFormat{}
