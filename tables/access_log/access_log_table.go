@@ -43,6 +43,7 @@ func (c *AccessLogTable) GetTableDefinition() *schema.TableSchema {
 			{
 				ColumnName: "tp_timestamp",
 				SourceName: "time_local",
+				TimeFormat: "%d/%b/%Y:%H:%M:%S %z",
 			},
 			{
 				ColumnName: "tp_source_ip",
