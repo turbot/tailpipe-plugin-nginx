@@ -40,6 +40,11 @@ func (c *AccessLogTableFormat) GetName() string {
 	return c.Name
 }
 
+// SetName sets the name of this format instance
+func (c *AccessLogTableFormat) SetName(name string) {
+	c.Name = name
+}
+
 func (c *AccessLogTableFormat) GetDescription() string {
 	return c.Description
 }
