@@ -1,8 +1,7 @@
 package access_log
 
 import (
-	"errors"
-	"github.com/turbot/go-kit/helpers"
+	typehelpers "github.com/turbot/go-kit/types"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
 	"github.com/turbot/tailpipe-plugin-sdk/constants"
 	"github.com/turbot/tailpipe-plugin-sdk/formats"
@@ -10,6 +9,7 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/schema"
 	"github.com/turbot/tailpipe-plugin-sdk/table"
 	"github.com/turbot/tailpipe-plugin-sdk/types"
+	"strings"
 )
 
 const AccessLogTableIdentifier = "nginx_access_log"
@@ -271,62 +271,62 @@ func (c *AccessLogTable) GetSourceMetadata() ([]*table.SourceMetadata[*types.Dyn
 
 func (c *AccessLogTable) EnrichRow(row *types.DynamicRow, sourceEnrichmentFields schema.SourceEnrichment) (*types.DynamicRow, error) {
 
-	// tp_timestamp / tp_date can be parsed from time_local OR time_iso8601
-	// Do this before row.Enrich so that it is set and can be parsed/formatted correctly along with tp_date (save duplicating code)
-	if ts, ok := row.Columns["time_local"]; ok && ts != AccessLogTableNilValue {
-		t, err := helpers.ParseTime(ts)
-		if err != nil {
-			return nil, err
-		}
-		row.TpTimestamp = *t
-	} else if ts, ok = row.Columns["time_iso8601"]; ok && ts != AccessLogTableNilValue {
-		t, err := helpers.ParseTime(ts)
-		if err != nil {
-			return nil, err
-		}
-		row.TpTimestamp = *t
-	} else {
-		return nil, errors.New("no timestamp found in row")
-	}
+	//// tp_timestamp / tp_date can be parsed from time_local OR time_iso8601
+	//// Do this before row.Enrich so that it is set and can be parsed/formatted correctly along with tp_date (save duplicating code)
+	//if ts, ok := row.sourceColumns["time_local"]; ok && ts != AccessLogTableNilValue {
+	//	t, err := helpers.ParseTime(ts)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	row.TpTimestamp = *t
+	//} else if ts, ok = row.sourceColumns["time_iso8601"]; ok && ts != AccessLogTableNilValue {
+	//	t, err := helpers.ParseTime(ts)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	row.TpTimestamp = *t
+	//} else {
+	//	return nil, errors.New("no timestamp found in row")
+	//}
 
 	// Enrich Array Based TP Fields as we don't have a mechanism to do this via direct mapping
 
 	// tp_ips
-	//var ips []string
-	//if remoteAddr, ok := row.Columns["remote_addr"]; ok {
-	//	ips = append(ips, remoteAddr)
-	//}
-	//if serverAddr, ok := row.Columns["server_addr"]; ok {
-	//	ips = append(ips, serverAddr)
-	//}
-	//if upstreamAddr, ok := row.Columns["upstream_addr"]; ok {
-	//	ips = append(ips, upstreamAddr)
-	//}
-	//if len(ips) > 0 {
-	//	row.Columns["tp_ips"] = strings.Join(ips, ",")
-	//}
-	//
-	//// tp_domains
-	//var domains []string
-	//if host, ok := row.Columns["host"]; ok && host != nilChar {
-	//	domains = append(domains, host)
-	//}
-	//if httpHost, ok := row.Columns["http_host"]; ok && httpHost != nilChar {
-	//	domains = append(domains, httpHost)
-	//}
-	//if len(domains) > 0 {
-	//	row.Columns["tp_domains"] = strings.Join(domains, ",")
-	//	row.Columns["tp_akas"] = strings.Join(domains, ",") // TODO: What should be the value of tp_akas?
-	//}
-	//
-	//// tp_usernames
-	//var usernames []string
-	//if remoteUser, ok := row.Columns["remote_user"]; ok && remoteUser != nilChar {
-	//	usernames = append(usernames, remoteUser)
-	//}
-	//if len(usernames) > 0 {
-	//	row.Columns["tp_usernames"] = strings.Join(usernames, ",")
-	//}
+	var ips []string
+	if remoteAddr, ok := row.OutputColumns["remote_addr"]; ok {
+		ips = append(ips, typehelpers.ToString(remoteAddr))
+	}
+	if serverAddr, ok := row.OutputColumns["server_addr"]; ok {
+		ips = append(ips, typehelpers.ToString(serverAddr))
+	}
+	if upstreamAddr, ok := row.OutputColumns["upstream_addr"]; ok {
+		ips = append(ips, typehelpers.ToString(upstreamAddr))
+	}
+	if len(ips) > 0 {
+		row.OutputColumns["tp_ips"] = ips
+	}
+
+	// tp_domains
+	var domains []string
+	if host, ok := row.OutputColumns["host"]; ok && host != AccessLogTableNilValue {
+		domains = append(domains, host)
+	}
+	if httpHost, ok := row.OutputColumns["http_host"]; ok && httpHost != AccessLogTableNilValue {
+		domains = append(domains, httpHost)
+	}
+	if len(domains) > 0 {
+		row.sourceColumns["tp_domains"] = strings.Join(domains, ",")
+		row.sourceColumns["tp_akas"] = strings.Join(domains, ",") // TODO: What should be the value of tp_akas?
+	}
+
+	// tp_usernames
+	var usernames []string
+	if remoteUser, ok := row.sourceColumns["remote_user"]; ok && remoteUser != nilChar {
+		usernames = append(usernames, remoteUser)
+	}
+	if len(usernames) > 0 {
+		row.sourceColumns["tp_usernames"] = strings.Join(usernames, ",")
+	}
 
 	// now call the base class to do the rest of the enrichment
 	return c.CustomTableImpl.EnrichRow(row, sourceEnrichmentFields)
