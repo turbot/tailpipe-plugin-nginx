@@ -170,7 +170,7 @@ func (c *AccessLogTable) GetTableDefinition() *schema.TableSchema {
 			{
 				ColumnName:  "time_iso8601",
 				Description: "Local time in ISO 8601 format",
-				Type:        "VARCHAR",
+				Type:        "TIMESTAMP",
 			},
 			// additional response variables
 			{
