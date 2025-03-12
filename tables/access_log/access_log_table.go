@@ -43,11 +43,6 @@ func (c *AccessLogTable) GetTableDefinition() *schema.TableSchema {
 		Name: AccessLogTableIdentifier,
 		Columns: []*schema.ColumnSchema{
 			{
-				ColumnName: "tp_timestamp",
-				SourceName: "time_local",
-				TimeFormat: "%d/%b/%Y:%H:%M:%S %z",
-			},
-			{
 				ColumnName: "tp_source_ip",
 				SourceName: "remote_addr",
 			},
@@ -316,7 +311,7 @@ func (c *AccessLogTable) EnrichRow(row *types.DynamicRow, sourceEnrichmentFields
 	}
 	if len(domains) > 0 {
 		row.OutputColumns["tp_domains"] = domains
-		row.OutputColumns["tp_akas"] = domains // TODO: What should be the value of tp_akas?
+		row.OutputColumns["tp_akas"] = domains
 	}
 
 	// tp_usernames
