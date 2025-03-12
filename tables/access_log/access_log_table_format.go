@@ -24,42 +24,42 @@ func NewAccessLogTableFormat() formats.Format {
 	return &AccessLogTableFormat{}
 }
 
-func (c *AccessLogTableFormat) Validate() error {
+func (a *AccessLogTableFormat) Validate() error {
 	return nil
 }
 
 // Identifier returns the format TYPE
-func (c *AccessLogTableFormat) Identifier() string {
+func (a *AccessLogTableFormat) Identifier() string {
 	// format name is same as table name
 	return AccessLogTableIdentifier
 }
 
 // GetName returns the format instance name
-func (c *AccessLogTableFormat) GetName() string {
+func (a *AccessLogTableFormat) GetName() string {
 	// format name is same as table name
-	return c.Name
+	return a.Name
 }
 
 // SetName sets the name of this format instance
-func (c *AccessLogTableFormat) SetName(name string) {
-	c.Name = name
+func (a *AccessLogTableFormat) SetName(name string) {
+	a.Name = name
 }
 
-func (c *AccessLogTableFormat) GetDescription() string {
-	return c.Description
+func (a *AccessLogTableFormat) GetDescription() string {
+	return a.Description
 }
 
-func (c *AccessLogTableFormat) GetMapper() (mappers.Mapper[*types.DynamicRow], error) {
+func (a *AccessLogTableFormat) GetMapper() (mappers.Mapper[*types.DynamicRow], error) {
 	// convert the layout to a regex
-	regex, err := c.GetRegex()
+	regex, err := a.GetRegex()
 	if err != nil {
 		return nil, err
 	}
 	return mappers.NewRegexMapper[*types.DynamicRow](regex)
 }
 
-func (c *AccessLogTableFormat) GetRegex() (string, error) {
-	format := regexp.QuoteMeta(c.Layout)
+func (a *AccessLogTableFormat) GetRegex() (string, error) {
+	format := regexp.QuoteMeta(a.Layout)
 	var unsupportedTokens []string
 
 	// regex to grab tokens
@@ -70,7 +70,7 @@ func (c *AccessLogTableFormat) GetRegex() (string, error) {
 	for i := 1; i < len(tokens); i++ {
 		// With QuoteMeta, tokens will be 2 characters further apart due to the backslash escape
 		if tokens[i][0]-tokens[i-1][1] < 1 {
-			return "", errors.New(fmt.Sprintf("concatenated tokens detected in format '%s', this is currently unsupported in this format, if this is a requirement a Regex format can be used.", c.Layout))
+			return "", errors.New(fmt.Sprintf("concatenated tokens detected in format '%s', this is currently unsupported in this format, if this is a requirement a Regex format can be used.", a.Layout))
 		}
 	}
 
@@ -96,9 +96,9 @@ func (c *AccessLogTableFormat) GetRegex() (string, error) {
 	return format, nil
 }
 
-func (c *AccessLogTableFormat) GetProperties() map[string]string {
+func (a *AccessLogTableFormat) GetProperties() map[string]string {
 	return map[string]string{
-		"layout": c.Layout,
+		"layout": a.Layout,
 	}
 }
 

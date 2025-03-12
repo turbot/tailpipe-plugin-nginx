@@ -9,7 +9,10 @@ replace (
 	github.com/turbot/tailpipe-plugin-sdk => ../tailpipe-plugin-sdk
 )
 
-require github.com/turbot/tailpipe-plugin-sdk v0.0.0
+require (
+	github.com/turbot/go-kit v1.1.0
+	github.com/turbot/tailpipe-plugin-sdk v0.0.0
+)
 
 require (
 	cloud.google.com/go v0.115.0 // indirect
@@ -145,8 +148,7 @@ require (
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/tklauser/numcpus v0.3.0 // indirect
 	github.com/tkrajina/go-reflector v0.5.8 // indirect
-	github.com/turbot/go-kit v1.1.0 // indirect
-	github.com/turbot/pipe-fittings/v2 v2.2.0 // indirect
+	github.com/turbot/pipe-fittings/v2 v2.3.0-rc.1 // indirect
 	github.com/turbot/pipes-sdk-go v0.12.0 // indirect
 	github.com/turbot/terraform-components v0.0.0-20231213122222-1f3526cab7a7 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
