@@ -79,7 +79,7 @@ Identify the hours with the most traffic.
 
 ```sql
 select
-  date_trunc('day', tp_timestamp) as day,
+  strftime(tp_timestamp, '%Y-%m-%d') as day,
   count(*) as request_count,
   sum(body_bytes_sent) as total_bytes_sent
 from
@@ -468,21 +468,36 @@ Identify potential directory traversal attacks.
 
 ```sql
 select
-  remote_addr,
-  request_uri,
-  status,
-  tp_timestamp,
-  http_user_agent
+    remote_addr,
+    request_uri,
+    status,
+    tp_timestamp,
+    http_user_agent
 from
-  nginx_access_log
+    nginx_access_log
 where
-  request_uri like '%../%'
-  or request_uri like '%/../%'
-  or request_uri like '%/./%'
-  or request_uri like '%/...%'
-  or request_uri like '%\\..\\%'
+   -- Plain directory traversal attempts
+    request_uri like '%../%'
+   or request_uri like '%/../%'
+   or request_uri like '%/./%'
+   or request_uri like '%/...%'
+   or request_uri like '%\\..\\%'
+   -- URL-encoded variants (both cases)
+   or request_uri like '%..%2f%'
+   or request_uri like '%..%2F%'
+   or request_uri like '%%2e%2e%2f%'
+   or request_uri like '%%2E%2E%2F%'
+   or request_uri like '%%2e%2e/%'
+   or request_uri like '%%2E%2E/%'
+   -- Double-encoded variants
+   or request_uri like '%25%32%65%25%32%65%25%32%66%'
+   -- Backslash variants
+   or request_uri like '%5c..%5c%'
+   or request_uri like '%5C..%5C%'
+   or request_uri like '%%5c..%5c%'
+   or request_uri like '%%5C..%5C%'
 order by
-  tp_timestamp desc;
+    tp_timestamp desc;
 ```
 
 ### SQL Injection Attempts
@@ -506,7 +521,7 @@ where
   or request_uri like '%DELETE%'
   or request_uri like '%DROP%'
   or request_uri like '%1=1%'
-  or request_uri like '%'='%'
+  or request_uri like '%''=''%'
 order by
   tp_timestamp desc;
 ```
