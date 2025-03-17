@@ -272,14 +272,14 @@ func (c *AccessLogTable) EnrichRow(row *types.DynamicRow, sourceEnrichmentFields
 		if err != nil {
 			return nil, err
 		}
-		row.OutputColumns[constants.TpTimestamp] = *t
+		row.OutputColumns[constants.TpTimestamp] = t
 	} else if ts, ok = row.GetSourceValue("time_iso8601"); ok && ts != AccessLogTableNilValue {
 		t, err := helpers.ParseTime(ts)
 		if err != nil {
 			return nil, err
 		}
 
-		row.OutputColumns[constants.TpTimestamp] = *t
+		row.OutputColumns[constants.TpTimestamp] = t
 	} else {
 		return nil, errors.New("no timestamp found in row")
 	}

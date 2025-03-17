@@ -10,7 +10,7 @@ replace (
 )
 
 require (
-	github.com/turbot/go-kit v1.1.0
+	github.com/turbot/go-kit v1.2.0
 	github.com/turbot/tailpipe-plugin-sdk v0.0.0
 )
 
