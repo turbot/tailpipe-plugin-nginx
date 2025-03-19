@@ -2,6 +2,7 @@ package access_log
 
 import (
 	"errors"
+
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
 	"github.com/turbot/tailpipe-plugin-sdk/constants"
@@ -25,17 +26,8 @@ func (c *AccessLogTable) Identifier() string {
 	return AccessLogTableIdentifier
 }
 
-// GetSupportedFormats returns a map of the formats that this table supports, including the default format
-func (c *AccessLogTable) GetSupportedFormats() *formats.SupportedFormats {
-	return &formats.SupportedFormats{
-		// map of constructors of ALL supported formats (built in and custom)
-		Formats: map[string]func() formats.Format{
-			AccessLogTableIdentifier:    NewAccessLogTableFormat,
-			constants.SourceFormatRegex: formats.NewRegex,
-		},
-		// which format is the default for this table
-		DefaultFormat: defaultAccessLogTableFormat,
-	}
+func (c *AccessLogTable) GetDefaultFormat() formats.Format {
+	return defaultAccessLogTableFormat
 }
 
 func (c *AccessLogTable) GetTableDefinition() *schema.TableSchema {
