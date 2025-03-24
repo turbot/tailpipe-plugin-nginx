@@ -4,6 +4,10 @@ go 1.24
 
 toolchain go1.24.0
 
+replace (
+	github.com/turbot/pipe-fittings/v2 => ../pipe-fittings
+	github.com/turbot/tailpipe-plugin-sdk => ../tailpipe-plugin-sdk
+)
 require (
 	github.com/turbot/go-kit v1.2.0
 	github.com/turbot/tailpipe-plugin-sdk v0.2.0-alpha.3
