@@ -10,8 +10,4 @@ var defaultAccessLogTableFormat = &AccessLogTableFormat{
 
 var AccessLogTableFormatPresets = []sdkformats.Format{
 	defaultAccessLogTableFormat,
-	&sdkformats.Regex{
-		Name:   "myRegex",
-		Layout: ".*",
-	},
 }
