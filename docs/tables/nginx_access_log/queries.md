@@ -4,7 +4,7 @@
 
 ### Daily Request Trends
 
-Count requests per day to identify traffic patterns over time. This query helps visualize usage trends, detect potential traffic anomalies, and understand the overall load on your nginx server across different days.
+Count requests per day to identify traffic patterns over time. This query provides a comprehensive view of daily request volume, helping you understand usage patterns, peak periods, and potential seasonal variations in web traffic. The results can be used for capacity planning, identifying anomalies, and tracking the impact of site changes or marketing campaigns.
 
 ```sql
 select
@@ -18,15 +18,13 @@ order by
   request_date asc;
 ```
 
-### Top 10 Clients by Request Count
+### Top 10 IP Addresses by Total Bytes Sent
 
-List the top 10 client IP addresses making requests. This query helps identify the most active clients, potentially revealing heavy users, bot traffic, or unusual access patterns that might require further investigation.
+List the top 10 IP addresses by total bytes sent. This query helps identify the most bandwidth-intensive clients, revealing potential bandwidth abuse, heavy users that might need rate limiting, or unusual access patterns that could indicate automated traffic. Understanding traffic distribution across clients is crucial for optimizing content delivery and resource allocation.
 
 ```sql
 select
   remote_addr,
-  count(*) as request_count,
-  count(distinct request_uri) as unique_urls,
   sum(body_bytes_sent) as total_bytes_sent
 from
   nginx_access_log
@@ -39,13 +37,13 @@ limit 10;
 
 ### HTTP Status Code Distribution
 
-Analyze the distribution of HTTP status codes. This query helps understand the overall health of your websites and server, identifying success rates, client errors, and server errors.
+Analyze the distribution of HTTP status codes across your web traffic. This query provides essential insights into server health and client behavior by breaking down success rates, client errors, and server errors. Understanding this distribution helps identify potential issues, monitor service quality, and track the impact of server configuration changes.
 
 ```sql
 select
   status,
   count(*) as count,
-  round(count(*) * 100.0 / sum(count(*)) over (), 2) as percentage
+  round(count(*) * 100.0 / sum(count(*)) over (), 3) as percentage
 from
   nginx_access_log
 group by
@@ -58,13 +56,13 @@ order by
 
 ### Top HTTP Methods
 
-Analyze the distribution of HTTP methods in your requests.
+Analyze the distribution of HTTP methods in your requests. This query reveals how clients interact with your server, helping identify unusual method usage patterns, potential security concerns, and API utilization trends. Understanding method distribution is crucial for security monitoring and ensuring proper server configuration.
 
 ```sql
 select
   request_method,
   count(*) as request_count,
-  round(count(*) * 100.0 / sum(count(*)) over (), 2) as percentage
+  round(count(*) * 100.0 / sum(count(*)) over (), 3) as percentage
 from
   nginx_access_log
 group by
@@ -75,7 +73,7 @@ order by
 
 ### Busiest Days
 
-Identify the hours with the most traffic.
+Identify the days with the highest request volume. This analysis helps optimize resource allocation, plan maintenance windows, and understand traffic patterns across different time periods. The data can be used to correlate traffic spikes with events or promotions and guide infrastructure scaling decisions.
 
 ```sql
 select
@@ -92,7 +90,7 @@ order by
 
 ### Busiest Hours
 
-Identify the hours with the most traffic.
+Track hourly traffic patterns to identify peak usage periods. This information is invaluable for scheduling maintenance, optimizing resource allocation, and ensuring adequate capacity during high-traffic periods. Understanding hourly patterns helps in making informed decisions about infrastructure scaling and content delivery optimization.
 
 ```sql
 select
@@ -109,7 +107,7 @@ order by
 
 ### Most Requested URLs
 
-Find the most frequently accessed URLs.
+Analyze the most frequently accessed URLs on your nginx server. This query reveals popular content and high-demand resources, helping optimize caching strategies and content distribution. Understanding URL access patterns is essential for improving user experience and server performance.
 
 ```sql
 select
@@ -129,7 +127,7 @@ limit 20;
 
 ### Error Distribution by Status Code
 
-Break down of different types of errors.
+Analyze the distribution of HTTP error responses across your web traffic. This query helps identify specific types of errors affecting your service, their frequency, and potential patterns that might indicate configuration issues or missing resources. Understanding error distribution is crucial for maintaining service quality and user experience.
 
 ```sql
 select
@@ -145,30 +143,11 @@ order by
   error_count desc;
 ```
 
-### Client Errors vs Server Errors
-
-Compare the number of client (4xx) vs server (5xx) errors over time.
-
-```sql
-select
-  date_trunc('hour', tp_timestamp) as hour,
-  count(*) filter (where status >= 400 and status < 500) as client_errors,
-  count(*) filter (where status >= 500) as server_errors
-from
-  nginx_access_log
-where
-  status >= 400
-group by
-  hour
-order by
-  hour desc;
-```
-
 ## Performance Monitoring
 
 ### Large Response Analysis
 
-Find requests returning large amounts of data.
+Identify requests generating substantial data transfer volumes. This query helps detect abnormally large responses that might impact server performance or indicate potential data exfiltration attempts. Understanding large response patterns is crucial for optimizing bandwidth usage, content delivery, and maintaining efficient server operation.
 
 ```sql
 select
@@ -190,7 +169,7 @@ limit 20;
 
 ### Browser Distribution
 
-Analyze which browsers are accessing your site.
+Analyze the distribution of client browsers accessing your site. This information helps optimize website compatibility, track mobile versus desktop usage trends, and identify outdated browser versions requiring support. Understanding browser patterns is essential for delivering optimal user experiences across different platforms.
 
 ```sql
 select
@@ -214,7 +193,7 @@ order by
 
 ### Bot Traffic Analysis
 
-Identify and analyze bot traffic.
+Monitor and analyze automated traffic patterns across your nginx server. This query helps distinguish between legitimate bot traffic (such as search engine crawlers) and potentially malicious automated access. Understanding bot behavior patterns is crucial for managing server resources and maintaining security.
 
 ```sql
 select
@@ -236,7 +215,7 @@ limit 20;
 
 ### Potential Security Threats
 
-Identify potentially malicious requests.
+Identify potentially malicious or suspicious requests targeting your server. This query detects common attack patterns, unauthorized access attempts, and potential security vulnerabilities by monitoring request patterns and payload characteristics. Early detection of security threats is essential for maintaining system integrity and protecting sensitive resources.
 
 ```sql
 select
@@ -260,7 +239,7 @@ limit 100;
 
 ### Rate Limiting Analysis
 
-Find potential DDoS attempts or aggressive crawlers.
+Detect aggressive request patterns that might indicate abuse or denial of service attempts. This query helps identify potential DDoS attacks, aggressive crawlers, or brute force attempts by monitoring request frequency and patterns from individual IP addresses. Understanding request patterns is crucial for implementing effective rate limiting policies.
 
 ```sql
 select
@@ -285,7 +264,7 @@ order by
 
 ### Upstream Response Times
 
-Analyze upstream server response times.
+Monitor backend server performance and response time patterns. This analysis helps identify potential bottlenecks, verify service level agreement compliance, and ensure optimal load balancing across upstream servers. Understanding upstream response patterns is essential for maintaining high-performance web services.
 
 ```sql
 select
@@ -307,14 +286,14 @@ limit 20;
 
 ### SSL Protocol Usage
 
-Analyze SSL/TLS protocol distribution.
+Analyze SSL/TLS protocol and cipher usage across your web traffic. This query helps monitor encryption protocol adoption, identify outdated or insecure protocols, and ensure compliance with security standards. Understanding SSL/TLS usage patterns is crucial for maintaining robust security while ensuring broad client compatibility.
 
 ```sql
 select
   ssl_protocol,
   ssl_cipher,
   count(*) as connection_count,
-  round(count(*) * 100.0 / sum(count(*)) over (), 2) as percentage
+  round(count(*) * 100.0 / sum(count(*)) over (), 3) as percentage
 from
   nginx_access_log
 where
@@ -330,7 +309,7 @@ order by
 
 ### SSL Cipher Vulnerabilities
 
-Detect usage of deprecated or insecure SSL ciphers. This query helps identify potential security risks by highlighting the use of outdated or vulnerable SSL protocols and ciphers.
+Detect usage of deprecated or insecure SSL ciphers in your web traffic. This query identifies potential security risks by monitoring the use of outdated SSL/TLS protocols and weak cipher suites, helping maintain a strong security posture and ensure compliance with modern encryption standards. Understanding cipher usage patterns is essential for protecting sensitive data and maintaining client trust.
 
 ```sql
 select
@@ -350,31 +329,25 @@ order by
 
 ### Suspicious HTTP Methods
 
-Detect potentially dangerous HTTP methods that could indicate attempted exploits or misconfigured clients.
+Monitor and analyze unusual HTTP method usage across your web traffic. This query helps identify potentially dangerous or non-standard HTTP methods that could indicate attempted exploits, security scanning tools, or misconfigured clients. Understanding HTTP method patterns is crucial for maintaining proper access controls and preventing unauthorized operations.
 
 ```sql
 select
   request_method,
-  request_uri,
-  remote_addr,
-  status,
   count(*) as request_count
 from
   nginx_access_log
 where
   request_method not in ('GET', 'POST', 'HEAD', 'OPTIONS')
 group by
-  request_method,
-  request_uri,
-  remote_addr,
-  status
+  request_method
 order by
   request_count desc;
 ```
 
 ### Failed Authentication Attempts
 
-Identify potential brute force attacks by detecting multiple failed authentication attempts (401 status codes).
+Track failed authentication attempts across your nginx server. This query helps identify potential brute force attacks or credential stuffing attempts by monitoring patterns of 401 status codes from specific IP addresses. Understanding authentication failure patterns is essential for protecting access to restricted resources and maintaining system security.
 
 ```sql
 select
@@ -397,7 +370,7 @@ order by
 
 ### Abnormal Response Sizes
 
-Detect unusually large or small responses that might indicate data exfiltration or failed attacks.
+Monitor requests with unusually large or small response sizes. This query helps identify potential data exfiltration attempts, failed attacks, or misconfigured services by detecting responses that deviate significantly from normal size ranges. Understanding response size patterns is crucial for maintaining proper data transfer controls and preventing unauthorized data access.
 
 ```sql
 select
@@ -417,7 +390,7 @@ order by
 
 ### Suspicious User Agents
 
-Identify requests with potentially malicious or suspicious user agents.
+Analyze requests with potentially malicious or suspicious user agent strings. This query helps identify automated tools, security scanners, and potential attack attempts by monitoring user agent patterns. Understanding user agent characteristics is essential for distinguishing between legitimate clients and potentially harmful automated access.
 
 ```sql
 select
@@ -443,7 +416,7 @@ order by
 
 ### Error Spikes
 
-Detect sudden spikes in error rates that might indicate attacks or system issues.
+Monitor sudden increases in error rates across your web traffic. This query helps identify potential attacks, system issues, or service degradation by detecting periods where error rates exceed normal thresholds. Understanding error rate patterns is crucial for maintaining service reliability and responding quickly to potential incidents.
 
 ```sql
 select
@@ -464,45 +437,45 @@ order by
 
 ### Directory Traversal Attempts
 
-Identify potential directory traversal attacks.
+Monitor potential directory traversal attack attempts targeting your server. This query helps identify malicious requests trying to access sensitive files or directories through path manipulation techniques. Understanding these attack patterns is essential for protecting file system integrity and preventing unauthorized access to restricted resources.
 
 ```sql
 select
-    remote_addr,
-    request_uri,
-    status,
-    tp_timestamp,
-    http_user_agent
+  remote_addr,
+  request_uri,
+  status,
+  tp_timestamp,
+  http_user_agent
 from
-    nginx_access_log
+  nginx_access_log
 where
-   -- Plain directory traversal attempts
-    request_uri like '%../%'
-   or request_uri like '%/../%'
-   or request_uri like '%/./%'
-   or request_uri like '%/...%'
-   or request_uri like '%\\..\\%'
-   -- URL-encoded variants (both cases)
-   or request_uri like '%..%2f%'
-   or request_uri like '%..%2F%'
-   or request_uri like '%%2e%2e%2f%'
-   or request_uri like '%%2E%2E%2F%'
-   or request_uri like '%%2e%2e/%'
-   or request_uri like '%%2E%2E/%'
-   -- Double-encoded variants
-   or request_uri like '%25%32%65%25%32%65%25%32%66%'
-   -- Backslash variants
-   or request_uri like '%5c..%5c%'
-   or request_uri like '%5C..%5C%'
-   or request_uri like '%%5c..%5c%'
-   or request_uri like '%%5C..%5C%'
+  -- Plain directory traversal attempts
+  request_uri like '%../%'
+  or request_uri like '%/../%'
+  or request_uri like '%/./%'
+  or request_uri like '%...%'
+  or request_uri like '%\\..\\%'
+  -- URL-encoded variants (both cases)
+  or request_uri like '%..%2f%'
+  or request_uri like '%..%2F%'
+  or request_uri like '%%2e%2e%2f%'
+  or request_uri like '%%2E%2E%2F%'
+  or request_uri like '%%2e%2e/%'
+  or request_uri like '%%2E%2E/%'
+  -- Double-encoded variants
+  or request_uri like '%25%32%65%25%32%65%25%32%66%'
+  -- Backslash variants
+  or request_uri like '%5c..%5c%'
+  or request_uri like '%5C..%5C%'
+  or request_uri like '%%5c..%5c%'
+  or request_uri like '%%5C..%5C%'
 order by
-    tp_timestamp desc;
+  tp_timestamp desc;
 ```
 
 ### SQL Injection Attempts
 
-Detect potential SQL injection attempts in request URIs.
+Monitor potential SQL injection attack attempts against your web applications. This query helps identify malicious requests containing SQL syntax patterns that could indicate attempts to manipulate or extract data from backend databases. Understanding SQL injection patterns is crucial for protecting data integrity and preventing unauthorized database access.
 
 ```sql
 select
@@ -528,7 +501,7 @@ order by
 
 ### Geographic Anomalies
 
-If you have IP geolocation data, detect requests from unusual locations or known problematic regions.
+Analyze request patterns based on client IP address ranges to identify geographic access anomalies. This query helps detect requests from unusual locations or known problematic regions, aiding in the identification of potential security threats and traffic patterns that may require additional scrutiny or access controls.
 
 ```sql
 select
