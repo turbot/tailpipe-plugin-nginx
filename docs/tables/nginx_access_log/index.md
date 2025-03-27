@@ -19,7 +19,7 @@ vi ~/.tailpipe/config/nginx.tpc
 partition "nginx_access_log" "my_nginx_logs" {
   source "file" {
     paths       = ["/var/log/nginx/access"]
-    file_layout = "%{DATA}.log"
+    file_layout = `%{DATA}.log`
   }
 }
 ```
@@ -103,5 +103,96 @@ group by
 order by
   request_count desc
 limit 10;
+```
+
+## Example Configurations
+
+### Basic Configuration
+
+Collect standard Nginx access logs from the default location.
+
+```hcl
+partition "nginx_access_log" "my_nginx_logs" {
+  source "file" {
+    paths       = ["/var/log/nginx/access"]
+    file_layout = `%{DATA}.log`
+  }
+}
+```
+
+### Minimal Format with Selected Fields
+
+Define a minimal format that only includes specific fields you need.
+
+```hcl
+format "nginx_access_log" "minimal" {
+  layout = `$time_local $request_uri $status $body_bytes_sent $remote_addr`
+}
+
+partition "nginx_access_log" "minimal_logs" {
+  source "file" {
+    format     = format.nginx_access_log.minimal
+    paths      = ["/var/log/nginx/minimal"]
+    file_layout = `%{DATA}.log`
+  }
+}
+```
+
+### Filter for Error Logs Only
+
+Use the filter argument to collect only error responses.
+
+```hcl
+partition "nginx_access_log" "error_logs" {
+  filter = "status >= 400"
+  
+  source "file" {
+    paths      = ["/var/log/nginx/access"]
+    file_layout = `%{DATA}.log`
+  }
+}
+```
+
+### Collect from Multiple Locations
+
+Collect logs from multiple directories or servers.
+
+```hcl
+partition "nginx_access_log" "multi_server_logs" {
+  source "file" {
+    paths      = [
+      "/var/log/nginx/server1/access",
+      "/var/log/nginx/server2/access",
+      "/var/log/nginx/server3/access"
+    ]
+    file_layout = `%{DATA}.log`
+  }
+}
+```
+
+### Collect from Compressed Log Files
+
+If your log files are compressed, you can still collect from them.
+
+```hcl
+partition "nginx_access_log" "compressed_logs" {
+  source "file" {
+    paths      = ["/var/log/nginx/archive"]
+    file_layout = `%{DATA}.log.gz`
+  }
+}
+```
+
+### Collect logs with Custom Path Structure
+
+For logs with specific directory structures including dates.
+
+```hcl
+partition "nginx_access_log" "dated_logs" {
+  source "file" {
+    paths      = ["/var/log/nginx"]
+    file_layout = `%{YEAR:year}/%{MONTHNUM:month}/%{MONTHDAY:day}/access.log`
+  }
+}
 ```
 
