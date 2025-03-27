@@ -183,6 +183,19 @@ partition "nginx_access_log" "compressed_logs" {
 }
 ```
 
+### Collect from ZIP Archives
+
+For logs archived in ZIP format, you can collect them directly.
+
+```hcl
+partition "nginx_access_log" "zip_logs" {
+  source "file" {
+    paths      = ["/var/log/nginx/archive"]
+    file_layout = `%{DATA}.log.zip`
+  }
+}
+```
+
 ### Collect logs with Custom Path Structure
 
 For logs with specific directory structures including dates.
