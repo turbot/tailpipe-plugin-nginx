@@ -7,6 +7,14 @@ description: "Nginx access logs capture detailed information about requests proc
 
 The `nginx_access_log` table allows you to query Nginx web server access logs. This table provides detailed information about HTTP requests processed by your Nginx servers, including client details, request information, response codes, and timing data.
 
+By default, this table uses the Nginx "combined" log format:
+
+```
+$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"
+```
+
+If your logs use a different format, you can specify a custom format as shown in the example configurations below.
+
 ## Configure
 
 Create a [partition](https://tailpipe.io/docs/manage/partition) for `nginx_access_log`:
@@ -122,7 +130,7 @@ partition "nginx_access_log" "my_nginx_logs" {
 
 ### Minimal Format with Selected Fields
 
-Define a minimal format that only includes specific fields you need.
+Define a minimal format that only includes specific fields you need. See the [Nginx log format documentation](http://nginx.org/en/docs/http/ngx_http_log_module.html#log_format) for a complete list of available fields.
 
 ```hcl
 format "nginx_access_log" "minimal" {
