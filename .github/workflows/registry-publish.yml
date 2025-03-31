@@ -11,4 +11,4 @@ jobs:
     secrets: inherit
     with:
       releaseTimeout: 60m
-      pipeline: tailpipe
+      pipeling: tailpipe
