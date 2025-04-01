@@ -115,7 +115,7 @@ limit 10;
 
 ## Example Configurations
 
-### Basic Configuration
+### Basic configuration
 
 Collect standard Nginx access logs from the default location.
 
@@ -155,7 +155,7 @@ partition "nginx_access_log" "error_logs" {
   filter = "status >= 400"
   
   source "file" {
-    paths      = ["/var/log/nginx/access"]
+    paths       = ["/var/log/nginx/access"]
     file_layout = `%{DATA}.log`
   }
 }
@@ -168,7 +168,7 @@ Collect logs from multiple directories or servers.
 ```hcl
 partition "nginx_access_log" "multi_server_logs" {
   source "file" {
-    paths      = [
+    paths = [
       "/var/log/nginx/server1/access",
       "/var/log/nginx/server2/access",
       "/var/log/nginx/server3/access"
