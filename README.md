@@ -91,20 +91,6 @@ order by
 +---------------+----------------+------------------+--------+---------------+
 ```
 
-<!-- TODO: Add in once we have detections mod
-## Detections as Code with Powerpipe
-
-Pre-built dashboards and detections for the Nginx plugin are available in [Powerpipe](https://powerpipe.io) mods, helping you monitor and analyze activity across your Nginx servers.
-
-For example, the [Nginx Access Log Detections mod](https://hub.powerpipe.io/mods/turbot/tailpipe-mod-nginx-access-log-detections) scans your Nginx logs for anomalies, such as potential security threats, high error rates, or unusual traffic patterns.
-
-Dashboards and detections are [open source](https://github.com/topics/tailpipe-mod), allowing easy customization and collaboration.
-
-To get started, choose a mod from the [Powerpipe Hub](https://hub.powerpipe.io/?engines=tailpipe&q=nginx).
-
-![image](docs/images/nginx_access_log_dashboard.png)
--->
-
 ## Developing
 
 Prerequisites:

@@ -21,7 +21,7 @@ The [Nginx Plugin for Tailpipe](https://hub.tailpipe.io/plugins/turbot/nginx) al
 - Community: [Join #tailpipe on Slack →](https://turbot.com/community/join)
 - Get involved: [Issues](https://github.com/turbot/tailpipe-plugin-nginx/issues)
 
-<!-- TODO: Insert image -->
+![image](https://raw.githubusercontent.com/turbot/tailpipe-plugin-nginx/main/docs/images/nginx_access_log_terminal.png?type=thumbnail)
 
 ## Getting Started
 
