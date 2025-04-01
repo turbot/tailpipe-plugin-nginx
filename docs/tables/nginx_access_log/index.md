@@ -13,7 +13,7 @@ By default, this table uses the Nginx [combined](https://nginx.org/en/docs/http/
 $remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"
 ```
 
-If your logs use a different format, you can specify a custom format as shown in the example configurations below.
+If your logs use a different format, you can specify a custom format as shown in the [example](https://hub.tailpipe.io/plugins/turbot/nginx/tables/nginx_access_log#collect-logs-with-custom-log-format) configurations below.
 
 ## Configure
 
@@ -126,7 +126,7 @@ partition "nginx_access_log" "my_nginx_logs" {
 }
 ```
 
-### Collect logs with custom field selection
+### Collect logs with custom log format
 
 Define a minimal format that only includes specific fields you need. See the [Nginx log format documentation](http://nginx.org/en/docs/http/ngx_http_log_module.html#log_format) for a complete list of available fields.
 
