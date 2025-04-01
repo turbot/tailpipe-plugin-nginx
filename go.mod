@@ -4,14 +4,14 @@ go 1.24
 
 toolchain go1.24.0
 
-replace (
-	github.com/turbot/pipe-fittings/v2 => ../pipe-fittings
-	github.com/turbot/tailpipe-plugin-sdk => ../tailpipe-plugin-sdk
-)
+//replace (
+//	github.com/turbot/pipe-fittings/v2 => ../pipe-fittings
+//	github.com/turbot/tailpipe-plugin-sdk => ../tailpipe-plugin-sdk
+//)
 
 require (
 	github.com/turbot/go-kit v1.2.0
-	github.com/turbot/tailpipe-plugin-sdk v0.2.0-alpha.3
+	github.com/turbot/tailpipe-plugin-sdk v0.2.0-rc.3
 )
 
 require (
@@ -102,7 +102,6 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/pgx/v5 v5.6.0 // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
-	github.com/jedib0t/go-pretty/v6 v6.5.9 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/karrick/gows v0.3.0 // indirect
