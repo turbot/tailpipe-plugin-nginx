@@ -202,3 +202,22 @@ partition "nginx_access_log" "zip_logs" {
 }
 ```
 
+### Collect logs from S3 bucket
+
+For logs archived in S3, commonly used for long-term storage and centralized logging.
+
+```hcl
+connection "aws" "logging" {
+  profile = "logging-account"
+}
+
+partition "nginx_access_log" "s3_logs" {
+  source "aws_s3_bucket" {
+    connection  = connection.aws.logging
+    bucket      = "nginx-access-logs"
+    prefix      = "logs/"
+    file_layout = `%{YEAR:year}/%{MONTHNUM:month}/%{MONTHDAY:day}/access.log.gz`
+  }
+}
+```
+
