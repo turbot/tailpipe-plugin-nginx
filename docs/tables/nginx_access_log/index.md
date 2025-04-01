@@ -68,8 +68,7 @@ from
 where
   status >= 400
 order by
-  tp_timestamp desc
-limit 10;
+  tp_timestamp desc;
 ```
 
 ### Large Response Analysis
@@ -90,11 +89,10 @@ from
 where
   body_bytes_sent > 1000000  -- More than 1MB
 order by
-  body_bytes_sent desc
-limit 10;
+  body_bytes_sent desc;
 ```
 
-### High Traffic Sources
+### Top 10 High Traffic Sources
 
 Identify the IP addresses generating the most traffic.
 
@@ -128,7 +126,7 @@ partition "nginx_access_log" "my_nginx_logs" {
 }
 ```
 
-### Minimal Format with Selected Fields
+### Collect logs with custom field selection
 
 Define a minimal format that only includes specific fields you need. See the [Nginx log format documentation](http://nginx.org/en/docs/http/ngx_http_log_module.html#log_format) for a complete list of available fields.
 
@@ -139,19 +137,19 @@ format "nginx_access_log" "minimal" {
 
 partition "nginx_access_log" "minimal_logs" {
   source "file" {
-    format     = format.nginx_access_log.minimal
-    paths      = ["/var/log/nginx/minimal"]
+    format      = format.nginx_access_log.minimal
+    paths       = ["/var/log/nginx/minimal"]
     file_layout = `%{DATA}.log`
   }
 }
 ```
 
-### Filter for Error Logs Only
+### Filter logs by HTTP error status codes
 
-Use the filter argument to collect only error responses.
+Use the filter argument to collect only requests with HTTP error status codes (4xx and 5xx).
 
 ```hcl
-partition "nginx_access_log" "error_logs" {
+partition "nginx_access_log" "http_errors" {
   filter = "status >= 400"
   
   source "file" {
@@ -161,7 +159,7 @@ partition "nginx_access_log" "error_logs" {
 }
 ```
 
-### Collect from Multiple Locations
+### Collect logs from multiple server directories
 
 Collect logs from multiple directories or servers.
 
@@ -178,41 +176,28 @@ partition "nginx_access_log" "multi_server_logs" {
 }
 ```
 
-### Collect from Compressed Log Files
+### Collect logs from gzip archives
 
 If your log files are compressed, you can still collect from them.
 
 ```hcl
 partition "nginx_access_log" "compressed_logs" {
   source "file" {
-    paths      = ["/var/log/nginx/archive"]
+    paths       = ["/var/log/nginx/archive"]
     file_layout = `%{DATA}.log.gz`
   }
 }
 ```
 
-### Collect from ZIP Archives
+### Collect logs from ZIP archives
 
 For logs archived in ZIP format, you can collect them directly.
 
 ```hcl
 partition "nginx_access_log" "zip_logs" {
   source "file" {
-    paths      = ["/var/log/nginx/archive"]
+    paths       = ["/var/log/nginx/archive"]
     file_layout = `%{DATA}.log.zip`
-  }
-}
-```
-
-### Collect logs with Custom Path Structure
-
-For logs with specific directory structures including dates.
-
-```hcl
-partition "nginx_access_log" "dated_logs" {
-  source "file" {
-    paths      = ["/var/log/nginx"]
-    file_layout = `%{YEAR:year}/%{MONTHNUM:month}/%{MONTHDAY:day}/access.log`
   }
 }
 ```

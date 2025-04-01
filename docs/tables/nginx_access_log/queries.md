@@ -1,5 +1,3 @@
-# Example Queries for nginx_access_log Table
-
 ## Activity Examples
 
 ### Daily Request Trends
@@ -234,7 +232,7 @@ where
   or request_uri like '%union select%'
 order by
   tp_timestamp desc
-limit 100;
+limit 10;
 ```
 
 ### Rate Limiting Analysis
