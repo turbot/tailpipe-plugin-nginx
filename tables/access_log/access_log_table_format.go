@@ -1,7 +1,6 @@
 package access_log
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -70,7 +69,7 @@ func (a *AccessLogTableFormat) GetRegex() (string, error) {
 	for i := 1; i < len(tokens); i++ {
 		// With QuoteMeta, tokens will be 2 characters further apart due to the backslash escape
 		if tokens[i][0]-tokens[i-1][1] < 1 {
-			return "", errors.New(fmt.Sprintf("concatenated tokens detected in format '%s', this is currently unsupported in this format, if this is a requirement a Regex format can be used.", a.Layout))
+			return "", fmt.Errorf("concatenated tokens detected in format '%s', this is currently unsupported in this format, if this is a requirement a Regex format can be used", a.Layout)
 		}
 	}
 
@@ -86,7 +85,7 @@ func (a *AccessLogTableFormat) GetRegex() (string, error) {
 	})
 
 	if len(unsupportedTokens) > 0 {
-		return "", errors.New("the following tokens are not currently supported in this format: " + strings.Join(unsupportedTokens, ", "))
+		return "", fmt.Errorf("the following tokens are not currently supported in this format: %s", strings.Join(unsupportedTokens, ", "))
 	}
 
 	if len(format) > 0 {

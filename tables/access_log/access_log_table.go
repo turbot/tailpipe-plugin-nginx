@@ -1,11 +1,10 @@
 package access_log
 
 import (
-	"errors"
-
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
 	"github.com/turbot/tailpipe-plugin-sdk/constants"
+	"github.com/turbot/tailpipe-plugin-sdk/error_types"
 	"github.com/turbot/tailpipe-plugin-sdk/formats"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 	"github.com/turbot/tailpipe-plugin-sdk/schema"
@@ -257,23 +256,30 @@ func (c *AccessLogTable) GetSourceMetadata() ([]*table.SourceMetadata[*types.Dyn
 }
 
 func (c *AccessLogTable) EnrichRow(row *types.DynamicRow, sourceEnrichmentFields schema.SourceEnrichment) (*types.DynamicRow, error) {
-	// tp_timestamp / tp_date can be parsed from time_local OR time_iso8601
-	// Do this before row.Enrich so that it is set and can be parsed/formatted correctly along with tp_date (save duplicating code)
+	var invalidFields []string
+
+	// tp_timestamp can be parsed from time_local OR time_iso8601
+	// We don't have a fallback for Source so we should populate prior to calling c.CustomTableImpl.EnrichRow
+	// if neither are set in the source, the base call will throw the missing fields error for tp_timestamp/tp_date
 	if ts, ok := row.GetSourceValue("time_local"); ok && ts != AccessLogTableNilValue {
 		t, err := helpers.ParseTime(ts)
 		if err != nil {
-			return nil, err
+			invalidFields = append(invalidFields, "time_local")
+		} else {
+			row.OutputColumns[constants.TpTimestamp] = t
 		}
-		row.OutputColumns[constants.TpTimestamp] = t
-	} else if ts, ok = row.GetSourceValue("time_iso8601"); ok && ts != AccessLogTableNilValue {
+	}
+	if ts, ok := row.GetSourceValue("time_iso8601"); ok && ts != AccessLogTableNilValue {
 		t, err := helpers.ParseTime(ts)
 		if err != nil {
-			return nil, err
+			invalidFields = append(invalidFields, "time_iso8601")
+		} else {
+			row.OutputColumns[constants.TpTimestamp] = t
 		}
+	}
 
-		row.OutputColumns[constants.TpTimestamp] = t
-	} else {
-		return nil, errors.New("no timestamp found in row")
+	if len(invalidFields) > 0 {
+		return nil, error_types.NewRowErrorWithFields([]string{}, invalidFields)
 	}
 
 	// Enrich Array Based TP Fields as we don't have a mechanism to do this via direct mapping
@@ -290,7 +296,7 @@ func (c *AccessLogTable) EnrichRow(row *types.DynamicRow, sourceEnrichmentFields
 		ips = append(ips, upstreamAddr)
 	}
 	if len(ips) > 0 {
-		row.OutputColumns["tp_ips"] = ips
+		row.OutputColumns[constants.TpIps] = ips
 	}
 
 	// tp_domains
@@ -302,8 +308,8 @@ func (c *AccessLogTable) EnrichRow(row *types.DynamicRow, sourceEnrichmentFields
 		domains = append(domains, httpHost)
 	}
 	if len(domains) > 0 {
-		row.OutputColumns["tp_domains"] = domains
-		row.OutputColumns["tp_akas"] = domains
+		row.OutputColumns[constants.TpDomains] = domains
+		row.OutputColumns[constants.TpAkas] = domains
 	}
 
 	// tp_usernames
@@ -312,7 +318,7 @@ func (c *AccessLogTable) EnrichRow(row *types.DynamicRow, sourceEnrichmentFields
 		usernames = append(usernames, remoteUser)
 	}
 	if len(usernames) > 0 {
-		row.OutputColumns["tp_usernames"] = usernames
+		row.OutputColumns[constants.TpUsernames] = usernames
 	}
 
 	// now call the base class to do the rest of the enrichment

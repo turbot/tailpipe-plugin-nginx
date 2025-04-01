@@ -4,6 +4,11 @@ go 1.24
 
 toolchain go1.24.0
 
+//replace (
+//	github.com/turbot/pipe-fittings/v2 => ../pipe-fittings
+//	github.com/turbot/tailpipe-plugin-sdk => ../tailpipe-plugin-sdk
+//)
+
 require (
 	github.com/turbot/go-kit v1.2.0
 	github.com/turbot/tailpipe-plugin-sdk v0.2.0-rc.3
@@ -130,7 +135,7 @@ require (
 	github.com/shiena/ansicolor v0.0.0-20230509054315-a9deabde6e02 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
-	github.com/smarty/assertions v1.15.0 // indirect
+	github.com/smarty/assertions v1.16.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
@@ -143,7 +148,7 @@ require (
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/tklauser/numcpus v0.3.0 // indirect
 	github.com/tkrajina/go-reflector v0.5.8 // indirect
-	github.com/turbot/pipe-fittings/v2 v2.3.0-rc.2 // indirect
+	github.com/turbot/pipe-fittings/v2 v2.3.0-rc.1 // indirect
 	github.com/turbot/pipes-sdk-go v0.12.0 // indirect
 	github.com/turbot/terraform-components v0.0.0-20231213122222-1f3526cab7a7 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
