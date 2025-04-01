@@ -7,7 +7,7 @@ description: "Nginx access logs capture detailed information about requests proc
 
 The `nginx_access_log` table allows you to query Nginx web server access logs. This table provides detailed information about HTTP requests processed by your Nginx servers, including client details, request information, response codes, and timing data.
 
-By default, this table uses the Nginx "combined" log format:
+By default, this table uses the Nginx [combined](https://nginx.org/en/docs/http/ngx_http_log_module.html#access_log) log format:
 
 ```
 $remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"
@@ -216,7 +216,6 @@ partition "nginx_access_log" "s3_logs" {
     connection  = connection.aws.logging
     bucket      = "nginx-access-logs"
     prefix      = "logs/"
-    file_layout = `%{YEAR:year}/%{MONTHNUM:month}/%{MONTHDAY:day}/access.log.gz`
   }
 }
 ```
