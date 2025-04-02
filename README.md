@@ -34,7 +34,7 @@ Install the plugin:
 tailpipe plugin install nginx
 ```
 
-Configure your table partition and data source to collect access logs using the combined format:
+Configure your table partition and data source:
 
 ```sh
 vi ~/.tailpipe/config/nginx.tpc
