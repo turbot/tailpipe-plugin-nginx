@@ -2,8 +2,6 @@ module github.com/turbot/tailpipe-plugin-nginx
 
 go 1.24
 
-toolchain go1.24.0
-
 //replace (
 //	github.com/turbot/pipe-fittings/v2 => ../pipe-fittings
 //	github.com/turbot/tailpipe-plugin-sdk => ../tailpipe-plugin-sdk
@@ -11,7 +9,7 @@ toolchain go1.24.0
 
 require (
 	github.com/turbot/go-kit v1.2.0
-	github.com/turbot/tailpipe-plugin-sdk v0.2.0-rc.3
+	github.com/turbot/tailpipe-plugin-sdk v0.2.0-rc.4
 )
 
 require (
@@ -102,6 +100,7 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/pgx/v5 v5.6.0 // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
+	github.com/jedib0t/go-pretty/v6 v6.5.9 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/karrick/gows v0.3.0 // indirect
@@ -148,7 +147,7 @@ require (
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/tklauser/numcpus v0.3.0 // indirect
 	github.com/tkrajina/go-reflector v0.5.8 // indirect
-	github.com/turbot/pipe-fittings/v2 v2.3.0-rc.1 // indirect
+	github.com/turbot/pipe-fittings/v2 v2.3.0-rc.4 // indirect
 	github.com/turbot/pipes-sdk-go v0.12.0 // indirect
 	github.com/turbot/terraform-components v0.0.0-20231213122222-1f3526cab7a7 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
