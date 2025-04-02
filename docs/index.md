@@ -58,7 +58,7 @@ partition "nginx_access_log" "my_logs" {
 }
 ```
 
-**Note**: If your access logs use a custom log format instead of the default combined format, refer to the partition in [Collect logs with custom log format](https://hub.tailpipe.io/plugins/turbot/nginx/tables/nginx_access_log#collect-logs-with-custom-log-format).
+**Note**: By default, the `nginx_access_log` table can collect logs using the combined log format. If your logs use a custom log format, please see [Collect logs with custom log format](https://hub.tailpipe.io/plugins/turbot/nginx/tables/nginx_access_log#collect-logs-with-custom-log-format).
 
 Download, enrich, and save logs from your source ([examples](https://tailpipe.io/docs/reference/cli/collect)):
 
