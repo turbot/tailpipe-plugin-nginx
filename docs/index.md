@@ -1,4 +1,15 @@
-# Nginx Plugin for Tailpipe
+---
+organization: Turbot
+category: ["software development"]
+icon_url: "/images/plugins/turbot/nginx.svg"
+brand_color: "#009900"
+display_name: "Nginx"
+description: "Tailpipe plugin for collecting and querying Nginx access logs."
+og_description: "Collect Nginx logs and query them instantly with SQL! Open source CLI. No DB required."
+og_image: "/images/plugins/turbot/nginx-social-graphic.png"
+---
+
+# Nginx + Tailpipe
 
 [Tailpipe](https://tailpipe.io) is an open-source CLI tool that allows you to collect logs and query them with SQL.
 
@@ -6,13 +17,11 @@
 
 The [Nginx Plugin for Tailpipe](https://hub.tailpipe.io/plugins/turbot/nginx) allows you to collect and query Nginx access logs using SQL to track activity, monitor trends, detect anomalies, and more!
 
-- **[Get started →](https://hub.tailpipe.io/plugins/turbot/nginx)**
 - Documentation: [Table definitions & examples](https://hub.tailpipe.io/plugins/turbot/nginx/tables)
 - Community: [Join #tailpipe on Slack →](https://turbot.com/community/join)
 - Get involved: [Issues](https://github.com/turbot/tailpipe-plugin-nginx/issues)
 
-Collect and query logs:
-![image](docs/images/nginx_access_log_terminal.png)
+![image](https://raw.githubusercontent.com/turbot/tailpipe-plugin-nginx/main/docs/images/nginx_access_log_terminal.png?type=thumbnail)
 
 ## Getting Started
 
@@ -92,51 +101,3 @@ order by
 | 172.16.0.25   | GET            | /static/main.css | 304    | 5432          |
 +---------------+----------------+------------------+--------+---------------+
 ```
-
-## Developing
-
-Prerequisites:
-
-- [Tailpipe](https://tailpipe.io/downloads)
-- [Golang](https://golang.org/doc/install)
-
-Clone:
-
-```sh
-git clone https://github.com/turbot/tailpipe-plugin-nginx.git
-cd tailpipe-plugin-nginx
-```
-
-After making your local changes, build the plugin, which automatically installs the new version to your `~/.tailpipe/plugins` directory:
-
-```sh
-make
-```
-
-Re-collect your data:
-
-```sh
-tailpipe collect nginx_access_log
-```
-
-Try it!
-
-```sh
-tailpipe query
-> .inspect nginx_access_log
-```
-
-## Open Source & Contributing
-
-This repository is published under the [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0) (source code) and [CC BY-NC-ND](https://creativecommons.org/licenses/by-nc-nd/2.0/) (docs) licenses. Please see our [code of conduct](https://github.com/turbot/.github/blob/main/CODE_OF_CONDUCT.md). We look forward to collaborating with you!
-
-[Tailpipe](https://tailpipe.io) is a product produced from this open source software, exclusively by [Turbot HQ, Inc](https://turbot.com). It is distributed under our commercial terms. Others are allowed to make their own distribution of the software, but cannot use any of the Turbot trademarks, cloud services, etc. You can learn more in our [Open Source FAQ](https://turbot.com/open-source).
-
-## Get Involved
-
-**[Join #tailpipe on Slack →](https://turbot.com/community/join)**
-
-Want to help but don't know where to start? Pick up one of the `help wanted` issues:
-
-- [Tailpipe](https://github.com/turbot/tailpipe/labels/help%20wanted)
-- [Nginx Plugin](https://github.com/turbot/tailpipe-plugin-nginx/labels/help%20wanted)
