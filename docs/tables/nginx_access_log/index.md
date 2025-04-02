@@ -13,7 +13,7 @@ By default, this table uses the Nginx combined log format:
 $remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"
 ```
 
-If your logs use a different format, you can specify a custom format as shown in the [example](https://hub.tailpipe.io/plugins/turbot/nginx/tables/nginx_access_log#collect-logs-with-custom-log-format) configurations below.
+If your logs use a different format, you can specify a custom format as shown in the [example configurations](https://hub.tailpipe.io/plugins/turbot/nginx/tables/nginx_access_log#collect-logs-with-custom-log-format) below.
 
 ## Configure
 
