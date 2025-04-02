@@ -7,7 +7,7 @@ description: "Nginx access logs capture detailed information about requests proc
 
 The `nginx_access_log` table allows you to query Nginx web server access logs. This table provides detailed information about HTTP requests processed by your Nginx servers, including client details, request information, response codes, and timing data.
 
-By default, this table uses the Nginx [combined log format](https://nginx.org/en/docs/http/ngx_http_log_module.html#access_log):
+By default, this table uses the Nginx combined log format:
 
 ```
 $remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"
