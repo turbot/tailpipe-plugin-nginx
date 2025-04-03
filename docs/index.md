@@ -53,7 +53,7 @@ vi ~/.tailpipe/config/nginx.tpc
 partition "nginx_access_log" "my_logs" {
   source "file" {
     paths       = ["/var/log/nginx/access/"]
-    file_layout = "%{DATA}.log"
+    file_layout = `%{DATA}.log`
   }
 }
 ```
