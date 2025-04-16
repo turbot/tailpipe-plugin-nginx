@@ -231,7 +231,7 @@ func (c *AccessLogTable) GetTableDefinition() *schema.TableSchema {
 				Type:        "float",
 			},
 		},
-		NullValue: AccessLogTableNilValue,
+		NullIf: AccessLogTableNilValue,
 	}
 }
 
