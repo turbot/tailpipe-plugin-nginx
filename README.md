@@ -103,7 +103,7 @@ Dashboards and detections are [open source](https://github.com/topics/tailpipe-m
 
 To get started, choose a mod from the [Powerpipe Hub](https://hub.powerpipe.io/?engines=tailpipe&q=nginx).
 
-![image](docs/images/nginx_access_log_detection_dashboard.png)
+![image](docs/images/nginx_access_log_owasp_top_10_dashboard.png)
 
 ## Developing
 

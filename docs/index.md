@@ -22,6 +22,8 @@ The [Nginx Plugin for Tailpipe](https://hub.tailpipe.io/plugins/turbot/nginx) al
 - Get involved: [Issues](https://github.com/turbot/tailpipe-plugin-nginx/issues)
 
 ![image](https://raw.githubusercontent.com/turbot/tailpipe-plugin-nginx/main/docs/images/nginx_access_log_terminal.png?type=thumbnail)
+![image](https://raw.githubusercontent.com/turbot/tailpipe-plugin-nginx/main/docs/images/nginx_access_log_detection_dashboard.png?type=thumbnail)
+![image](https://raw.githubusercontent.com/turbot/tailpipe-plugin-nginx/main/docs/images/nginx_access_log_owasp_top_10_dashboard.png?type=thumbnail)
 
 ## Getting Started
 
