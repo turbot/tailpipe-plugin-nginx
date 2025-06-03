@@ -1,3 +1,9 @@
+## v0.2.0 [2025-06-03]
+
+_Dependencies_
+
+- Recompiled plugin with [tailpipe-plugin-sdk v0.7.0](https://github.com/turbot/tailpipe-plugin-sdk/blob/develop/CHANGELOG.md#v070-2025-06-03) that improves how collection end times are tracked, helping make future collections more accurate and reliable. ([#37](https://github.com/turbot/tailpipe-plugin-nginx/pull/37))
+
 ## v0.1.1 [2025-04-03]
 
 _Bug fixes_
