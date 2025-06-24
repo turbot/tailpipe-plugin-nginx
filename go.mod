@@ -9,7 +9,7 @@ go 1.24
 
 require (
 	github.com/turbot/go-kit v1.3.0
-	github.com/turbot/tailpipe-plugin-sdk v0.7.2
+	github.com/turbot/tailpipe-plugin-sdk v0.8.0
 )
 
 require (
@@ -114,7 +114,7 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/karrick/gows v0.3.0 // indirect
-	github.com/klauspost/compress v1.17.11 // indirect
+	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.9 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
